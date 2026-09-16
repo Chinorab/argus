@@ -1,10 +1,31 @@
 {
-  "etablissement": "Le Comptoir de Saint-Denis (démo)",
+  "establishment": "Le Comptoir de Saint-Denis (demo)",
   "photos": [
-    { "file": "chambre-froide.jpg", "hint": "chambre froide légumes", "credit": "Dwight Sipler, CC BY 2.0", "source": "https://commons.wikimedia.org/wiki/File:Walk-in_cooler_(3894648278).jpg" },
-    { "file": "passe.jpg", "hint": "passe et zone de dressage", "credit": "MarkBuckawicki, CC0", "source": "https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg" },
-    { "file": "cellule.jpg", "hint": "cellule de refroidissement et four", "credit": "Shixart1985, CC BY 2.0", "source": "https://commons.wikimedia.org/wiki/File:Kitchen_equipment_seen_in_a_commercial_space_highlights_the_tools_used_for_food_preparation_and_storage_in_a_restaurant.jpg" }
+    {
+      "file": "walk-in-fridge.jpg",
+      "hint": { "en": "walk-in fridge, vegetables", "fr": "chambre froide légumes" },
+      "credit": "Dwight Sipler, CC BY 2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Walk-in_cooler_(3894648278).jpg"
+    },
+    {
+      "file": "pass-station.jpg",
+      "hint": { "en": "pass and plating station", "fr": "passe et zone de dressage" },
+      "credit": "MarkBuckawicki, CC0",
+      "source": "https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg"
+    },
+    {
+      "file": "blast-chiller.jpg",
+      "hint": { "en": "blast chiller and oven", "fr": "cellule de refroidissement et four" },
+      "credit": "Shixart1985, CC BY 2.0",
+      "source": "https://commons.wikimedia.org/wiki/File:Kitchen_equipment_seen_in_a_commercial_space_highlights_the_tools_used_for_food_preparation_and_storage_in_a_restaurant.jpg"
+    }
   ],
-  "temperatures": "Relevés du 14/09 au 16/09\nFrigo 1 (produits laitiers) : 14/09 matin 3.5 ; soir 4.0 ; 15/09 matin 3.8 ; soir 4.2 ; 16/09 matin 3.6\nFrigo 2 (viandes) : 14/09 matin 6.5 ; soir 7.1 ; 15/09 matin 7.0 ; soir 7.4 ; 16/09 matin 6.9\nCongélateur : 14/09 -19 ; 15/09 -18.5 ; 16/09 -17\nBain-marie service midi 15/09 : 58",
-  "declaratif": "Restaurant traditionnel 45 couverts, 3 salariés en cuisine. Formation hygiène 14 h suivie par le gérant en 2019.\nPas de plan de maîtrise sanitaire écrit. Températures relevées « quand on y pense » sur un cahier.\nNettoyage chaque soir sans plan écrit. Contrat dératisation en cours.\nLe frigo 2 fait du bruit depuis une semaine et la porte ferme mal."
+  "temperatures": {
+    "en": "Logs from 14/09 to 16/09\nFridge 1 (dairy): 14/09 am 3.5; pm 4.0; 15/09 am 3.8; pm 4.2; 16/09 am 3.6\nFridge 2 (meat): 14/09 am 6.5; pm 7.1; 15/09 am 7.0; pm 7.4; 16/09 am 6.9\nFreezer: 14/09 -19; 15/09 -18.5; 16/09 -17\nBain-marie lunch service 15/09: 58",
+    "fr": "Relevés du 14/09 au 16/09\nFrigo 1 (produits laitiers) : 14/09 matin 3.5 ; soir 4.0 ; 15/09 matin 3.8 ; soir 4.2 ; 16/09 matin 3.6\nFrigo 2 (viandes) : 14/09 matin 6.5 ; soir 7.1 ; 15/09 matin 7.0 ; soir 7.4 ; 16/09 matin 6.9\nCongélateur : 14/09 -19 ; 15/09 -18.5 ; 16/09 -17\nBain-marie service midi 15/09 : 58"
+  },
+  "statement": {
+    "en": "Traditional restaurant, 45 seats, 3 kitchen staff. The owner completed the 14-hour hygiene training in 2019.\nNo written food safety management plan (PMS). Temperatures are logged \"when we think of it\" in a notebook.\nCleaning done every evening but no written plan. Pest-control contract in place.\nFridge 2 has been noisy for a week and its door does not close properly.",
+    "fr": "Restaurant traditionnel 45 couverts, 3 salariés en cuisine. Formation hygiène 14 h suivie par le gérant en 2019.\nPas de plan de maîtrise sanitaire écrit. Températures relevées « quand on y pense » sur un cahier.\nNettoyage chaque soir sans plan écrit. Contrat dératisation en cours.\nLe frigo 2 fait du bruit depuis une semaine et la porte ferme mal."
+  }
 }

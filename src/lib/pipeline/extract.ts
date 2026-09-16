@@ -1,56 +1,52 @@
 import { MODELS, nebius, extractJson } from "@/lib/nebius";
-import type { ReleveTemperature } from "@/lib/schemas";
-import { qualifier, type ReleveBrut } from "@/lib/rules/temperatures";
+import type { TemperatureReading } from "@/lib/schemas";
+import { qualify, type RawReading } from "@/lib/rules/temperatures";
 import { z } from "zod";
 
 /**
- * Étape 2 — extraction des relevés par Nemotron Nano 30B.
- * Le modèle n'émet AUCUN verdict : il transcrit (équipement, type, denrée, valeur, date).
- * Les limites et la conformité sont calculées par `rules/temperatures.ts`.
+ * Step 2 — temperature log transcription by Nemotron Nano 30B.
+ * The model issues NO verdict: it transcribes (equipment, kind, foodstuff, value, timestamp).
+ * Limits and compliance are computed by `rules/temperatures.ts`.
  */
-const SYSTEM = `Tu transcris des relevés de température de cuisine professionnelle en JSON.
-Entrée : texte brut (CSV, tableau collé, notes, phrases). Un relevé = une valeur.
-Ne calcule RIEN, ne juge RIEN : transcris chaque valeur telle quelle, dans l'ordre du texte.
+const SYSTEM = `You transcribe professional-kitchen temperature logs into JSON.
+Input: raw text (CSV, pasted table, notes, sentences), possibly in French. One reading = one value.
+Compute NOTHING, judge NOTHING: transcribe every value as written, in the order of the text.
 
-Pour chaque relevé :
-- "equipement" : nom tel qu'écrit (ex. "Frigo 2 (viandes)").
-- "type" : froid_positif (frigo, chambre froide, vitrine réfrigérée), froid_negatif (congélateur,
-  surgélateur), chaud (bain-marie, maintien au chaud, armoire chauffante, service chaud),
-  refroidissement (cellule, refroidissement rapide), autre.
-- "denree" : viande_hachee, viande, poisson, plat_cuisine, denree_perissable (laitier, œufs,
-  charcuterie, légumes), ou inconnue si le texte ne le dit pas.
-- "valeur_c" : nombre (négatif pour les congélateurs, ex. -18.5).
-- "horodatage" : date/heure telle qu'écrite, ou null.
+For each reading:
+- "equipment": name as written (e.g. "Fridge 2 (meat)").
+- "kind": chilled (fridge, walk-in, cold display), frozen (freezer), hot_holding (bain-marie,
+  hot cabinet, hot service), cooling (blast chiller, rapid cooling), other.
+- "foodstuff": minced_meat, meat, fish, cooked_dish, perishable (dairy, eggs, deli, vegetables),
+  or unknown if the text does not say.
+- "value_c": number (negative for freezers, e.g. -18.5).
+- "timestamp": date/time as written, or null.
 
-Réponds UNIQUEMENT en JSON : {"releves": [{"equipement": "...", "type": "...", "denree": "...", "valeur_c": 0, "horodatage": null}]}`;
+Reply ONLY in JSON: {"readings": [{"equipment": "...", "kind": "...", "foodstuff": "...", "value_c": 0, "timestamp": null}]}`;
 
-const Brut = z.object({
-  equipement: z.string(),
-  type: z.enum(["froid_positif", "froid_negatif", "chaud", "refroidissement", "autre"]).catch("autre"),
-  denree: z
-    .enum(["viande_hachee", "viande", "poisson", "plat_cuisine", "denree_perissable", "inconnue"])
-    .nullish()
-    .catch("inconnue"),
-  valeur_c: z.coerce.number(),
-  horodatage: z.string().nullish(),
+const Raw = z.object({
+  equipment: z.string(),
+  kind: z.enum(["chilled", "frozen", "hot_holding", "cooling", "other"]).catch("other"),
+  foodstuff: z.enum(["minced_meat", "meat", "fish", "cooked_dish", "perishable", "unknown"]).nullish().catch("unknown"),
+  value_c: z.coerce.number(),
+  timestamp: z.string().nullish(),
 });
-const Out = z.object({ releves: z.array(Brut) });
+const Out = z.object({ readings: z.array(Raw) });
 
-export async function extractTemperatures(raw: string): Promise<ReleveTemperature[]> {
-  if (!raw.trim()) return [];
+export async function extractTemperatures(rawText: string): Promise<TemperatureReading[]> {
+  if (!rawText.trim()) return [];
   const res = await nebius.chat.completions.create({
     model: MODELS.fast,
     temperature: 0,
     max_tokens: 4000,
     messages: [
       { role: "system", content: SYSTEM },
-      { role: "user", content: raw },
+      { role: "user", content: rawText },
     ],
-    // Transcription déterministe : le mode raisonnement de Nemotron agrège les relevés, on le coupe.
-    // @ts-expect-error paramètre vLLM transmis tel quel par Token Factory
+    // Deterministic transcription: Nemotron's reasoning mode aggregates tabular data, so we turn it off.
+    // @ts-expect-error vLLM parameter passed through by Token Factory
     chat_template_kwargs: { enable_thinking: false },
   });
   const text = res.choices[0]?.message?.content ?? "";
-  const bruts: ReleveBrut[] = Out.parse(extractJson(text)).releves;
-  return qualifier(bruts);
+  const readings: RawReading[] = Out.parse(extractJson(text)).readings;
+  return qualify(readings);
 }

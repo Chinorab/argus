@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-/** Normalise une valeur libre du modèle vers une clé d'enum : minuscules, sans accents, `_`. */
+/** Normalises a free-form model value into an enum key: lowercase, no accents, underscores. */
 const slug = (v: unknown) =>
   String(v ?? "")
     .normalize("NFD")
@@ -10,7 +10,7 @@ const slug = (v: unknown) =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
 
-/** Enum tolérant : accepte les variantes d'écriture, sinon retombe sur `fallback`. */
+/** Lenient enum: accepts spelling variants and aliases, otherwise falls back to `fallback`. */
 function lenientEnum<const T extends readonly [string, ...string[]]>(values: T, fallback: T[number], aliases: Record<string, T[number]> = {}) {
   const base = z.enum(values);
   return z.preprocess((v) => {
@@ -22,114 +22,158 @@ function lenientEnum<const T extends readonly [string, ...string[]]>(values: T, 
   }, base);
 }
 
-/** Zones d'une cuisine de restauration commerciale (grille DGAL). */
+/** Kitchen zones of a commercial restaurant (DGAL inspection grid). */
 const ZONES = [
-  "reception",
-  "stockage_sec",
-  "stockage_froid",
-  "legumerie",
-  "preparation_froide",
-  "preparation_chaude",
-  "cuisson",
-  "plonge",
-  "dechets",
-  "vestiaires_sanitaires",
-  "salle",
-  "exterieur",
-  "inconnue",
+  "receiving",
+  "dry_storage",
+  "cold_storage",
+  "vegetable_prep",
+  "cold_prep",
+  "hot_prep",
+  "cooking",
+  "dishwashing",
+  "waste",
+  "staff_facilities",
+  "dining_room",
+  "outdoor",
+  "general",
 ] as const;
-export const Zone = lenientEnum(ZONES, "inconnue", {
-  chambre_froide: "stockage_froid",
-  frigo: "stockage_froid",
-  reserve: "stockage_sec",
-  economat: "stockage_sec",
-  cuisine: "preparation_chaude",
-  laverie: "plonge",
-  poubelles: "dechets",
-  local_dechets: "dechets",
-  sanitaires: "vestiaires_sanitaires",
-  vestiaires: "vestiaires_sanitaires",
-  documentaire: "inconnue",
-  documents: "inconnue",
-  pms: "inconnue",
-  administratif: "inconnue",
-  personnel: "inconnue",
-  etablissement: "inconnue",
-  general: "inconnue",
+export const ZONE_VALUES = ZONES;
+export const Zone = lenientEnum(ZONES, "general", {
+  reception: "receiving",
+  delivery: "receiving",
+  stockage_sec: "dry_storage",
+  pantry: "dry_storage",
+  storeroom: "dry_storage",
+  stockage_froid: "cold_storage",
+  walk_in: "cold_storage",
+  fridge: "cold_storage",
+  freezer: "cold_storage",
+  chambre_froide: "cold_storage",
+  legumerie: "vegetable_prep",
+  preparation_froide: "cold_prep",
+  preparation_chaude: "hot_prep",
+  kitchen: "hot_prep",
+  cuisson: "cooking",
+  plonge: "dishwashing",
+  dechets: "waste",
+  garbage: "waste",
+  vestiaires_sanitaires: "staff_facilities",
+  restrooms: "staff_facilities",
+  salle: "dining_room",
+  exterieur: "outdoor",
+  documentation: "general",
+  documents: "general",
+  staff: "general",
+  personnel: "general",
+  inconnue: "general",
+  unknown: "general",
 });
 export type Zone = z.infer<typeof Zone>;
-export const ZONE_VALUES = ZONES;
 
-export const Severite = lenientEnum(["mineure", "majeure", "critique"], "majeure", { moyenne: "majeure", mineur: "mineure", majeur: "majeure" });
-export type Severite = z.infer<typeof Severite>;
+export const Severity = lenientEnum(["minor", "major", "critical"], "major", {
+  mineure: "minor",
+  majeure: "major",
+  moyenne: "major",
+  medium: "major",
+  critique: "critical",
+});
+export type Severity = z.infer<typeof Severity>;
 
-/** Les 4 niveaux Alim'confiance (arrêté du 15 décembre 2016). */
-export const NoteAlimConfiance = lenientEnum(
-  ["tres_satisfaisant", "satisfaisant", "a_ameliorer", "a_corriger_de_maniere_urgente"],
-  "a_ameliorer",
-  { a_corriger: "a_corriger_de_maniere_urgente", urgent: "a_corriger_de_maniere_urgente" },
+/** The four Alim'confiance levels published by the French State (order of 15 December 2016). */
+export const Grade = lenientEnum(
+  ["very_satisfactory", "satisfactory", "to_improve", "urgent_correction"],
+  "to_improve",
+  {
+    tres_satisfaisant: "very_satisfactory",
+    satisfaisant: "satisfactory",
+    a_ameliorer: "to_improve",
+    needs_improvement: "to_improve",
+    a_corriger_de_maniere_urgente: "urgent_correction",
+    to_correct_urgently: "urgent_correction",
+    urgent: "urgent_correction",
+  },
 );
-export type NoteAlimConfiance = z.infer<typeof NoteAlimConfiance>;
+export type Grade = z.infer<typeof Grade>;
 
-/** Sortie de l'étape 1 (perception Omni) pour une photo. */
+/** Output of step 1 (photo perception). */
 export const Observation = z.object({
   zone: Zone,
   description: z.string(),
-  equipements: z.array(z.string()).default([]),
+  equipment: z.array(z.string()).default([]),
   anomalies: z
     .array(
       z.object({
-        constat: z.string(),
-        localisation: z.string().nullish(),
-        confiance: z.number().min(0).max(1),
+        finding: z.string(),
+        location: z.string().nullish(),
+        confidence: z.number().min(0).max(1),
       }),
     )
     .default([]),
-  points_positifs: z.array(z.string()).default([]),
+  positives: z.array(z.string()).default([]),
 });
 export type Observation = z.infer<typeof Observation>;
 
-/** Relevé de température normalisé (étape 2). */
-export const ReleveTemperature = z.object({
-  equipement: z.string(),
-  type: z.enum(["froid_positif", "froid_negatif", "chaud", "refroidissement", "autre"]),
-  valeur_c: z.number(),
-  horodatage: z.string().nullish(),
-  limite_c: z.number().nullish(),
-  conforme: z.boolean(),
-  commentaire: z.string().nullish(),
+/** Normalised temperature reading (step 2 + rule engine). */
+export const TemperatureReading = z.object({
+  equipment: z.string(),
+  kind: z.enum(["chilled", "frozen", "hot_holding", "cooling", "other"]),
+  value_c: z.number(),
+  timestamp: z.string().nullish(),
+  limit_c: z.number().nullish(),
+  compliant: z.boolean(),
+  note: z.string().nullish(),
+  /** Set by the rule engine when ≥ 2 consecutive readings are out of range. */
+  persistent_drift: z.boolean().default(false),
 });
-export type ReleveTemperature = z.infer<typeof ReleveTemperature>;
+export type TemperatureReading = z.infer<typeof TemperatureReading>;
 
-/** Non-conformité qualifiée par le juge (étape 3). */
-export const NonConformite = z.object({
+/** A non-compliance qualified by the judge (step 3). */
+export const Finding = z.object({
   id: z.string(),
-  titre: z.string(),
+  title: z.string(),
   zone: Zone,
-  severite: Severite,
-  constat: z.string(),
-  reference_reglementaire: z.string(),
-  risque: z.string(),
-  preuve: z.object({
-    type: lenientEnum(["photo", "temperature", "audio", "declaratif"], "declaratif", { releve: "temperature", vocal: "audio", note_vocale: "audio" }),
+  severity: Severity,
+  observation: z.string(),
+  regulatory_reference: z.string(),
+  risk: z.string(),
+  evidence: z.object({
+    type: lenientEnum(["photo", "temperature", "audio", "declared"], "declared", {
+      releve: "temperature",
+      reading: "temperature",
+      voice: "audio",
+      voice_note: "audio",
+      declaratif: "declared",
+      statement: "declared",
+    }),
     ref: z.string(),
   }),
-  action_corrective: z.string(),
-  delai: lenientEnum(["immediat", "24h", "7j", "30j"], "7j", {
-    immediate: "immediat", sans_delai: "immediat", "24_h": "24h", "1j": "24h", "1_jour": "24h", "7_j": "7j", "7_jours": "7j", "1_semaine": "7j", "30_j": "30j", "30_jours": "30j", "1_mois": "30j",
+  corrective_action: z.string(),
+  deadline: lenientEnum(["immediate", "24h", "7d", "30d"], "7d", {
+    immediat: "immediate",
+    now: "immediate",
+    "24_h": "24h",
+    "1d": "24h",
+    "1_day": "24h",
+    "7j": "7d",
+    "7_days": "7d",
+    "1_week": "7d",
+    "30j": "30d",
+    "30_days": "30d",
+    "1_month": "30d",
   }),
 });
-export type NonConformite = z.infer<typeof NonConformite>;
+export type Finding = z.infer<typeof Finding>;
 
-/** Rapport d'inspection simulée complet. */
-export const Rapport = z.object({
-  note_predite: NoteAlimConfiance,
-  justification_note: z.string(),
-  synthese_inspecteur: z.string(),
-  non_conformites: z.array(NonConformite),
-  points_forts: z.array(z.string()),
-  /** Points que l'inspecteur voudra vérifier sur place, faute de preuve dans le dossier. */
-  points_a_verifier: z.array(z.string()).default([]),
-  risque_fermeture: lenientEnum(["faible", "modere", "eleve"], "modere"),
+/** Full simulated inspection report. */
+export const Report = z.object({
+  predicted_grade: Grade,
+  grade_rationale: z.string(),
+  inspector_summary: z.string(),
+  findings: z.array(Finding),
+  strengths: z.array(z.string()),
+  /** Items the inspector would check on site, for which the file holds no evidence. */
+  to_verify: z.array(z.string()).default([]),
+  closure_risk: lenientEnum(["low", "moderate", "high"], "moderate", { faible: "low", modere: "moderate", eleve: "high", medium: "moderate" }),
 });
-export type Rapport = z.infer<typeof Rapport>;
+export type Report = z.infer<typeof Report>;

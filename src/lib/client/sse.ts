@@ -1,6 +1,6 @@
 import type { InspectionEvent, InspectionInput } from "@/lib/pipeline/run";
 
-/** Envoie le dossier et itère sur les événements SSE renvoyés par /api/inspect. */
+/** Sends the case file and iterates over the SSE events returned by /api/inspect. */
 export async function* inspect(input: InspectionInput, signal?: AbortSignal): AsyncGenerator<InspectionEvent> {
   const res = await fetch("/api/inspect", {
     method: "POST",

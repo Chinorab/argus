@@ -46,4 +46,4 @@ samples/**/*.jpg
 samples/**/*.jpeg
 samples/**/*.png
 samples/**/*.webp
-samples/**/rapport.json
+samples/**/report.json

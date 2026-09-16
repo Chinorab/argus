@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 /*
- * Argus — jetons de design.
- * Ambiance « dossier d'inspection » : papier chaud, encre, un seul accent (vert-bleu profond),
- * plus l'échelle Alim'confiance (4 niveaux) qui est la seule couleur forte de l'interface.
+ * Argus — design tokens.
+ * "Inspection file" mood: warm paper, ink, a single accent (deep teal), plus the
+ * Alim'confiance scale (4 levels), the only strong colour in the interface.
  */
 :root {
   --paper: #f6f4ef;
@@ -17,14 +17,14 @@
   --accent-ink: #ffffff;
   --accent-soft: #dcecea;
 
-  --n1: #1f7a3a; /* très satisfaisant */
-  --n2: #7cb342; /* satisfaisant */
-  --n3: #e8a317; /* à améliorer */
-  --n4: #c62828; /* à corriger de manière urgente */
+  --n1: #1f7a3a; /* very satisfactory */
+  --n2: #7cb342; /* satisfactory */
+  --n3: #e8a317; /* to improve */
+  --n4: #c62828; /* urgent correction */
 
-  --sev-mineure: #8a8f98;
-  --sev-majeure: #e8a317;
-  --sev-critique: #c62828;
+  --sev-minor: #8a8f98;
+  --sev-major: #e8a317;
+  --sev-critical: #c62828;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -57,9 +57,9 @@
   --color-n2: var(--n2);
   --color-n3: var(--n3);
   --color-n4: var(--n4);
-  --color-sev-mineure: var(--sev-mineure);
-  --color-sev-majeure: var(--sev-majeure);
-  --color-sev-critique: var(--sev-critique);
+  --color-sev-mineure: var(--sev-minor);
+  --color-sev-majeure: var(--sev-major);
+  --color-sev-critique: var(--sev-critical);
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
@@ -76,7 +76,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Pulsation discrète des étapes en cours dans la timeline. */
+/* Subtle pulse of the running steps in the timeline. */
 @keyframes argus-pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
@@ -85,7 +85,7 @@ body {
   animation: argus-pulse 1.4s ease-in-out infinite;
 }
 
-/* Apparition des cartes du rapport. */
+/* Report cards rising in. */
 @keyframes argus-rise {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }

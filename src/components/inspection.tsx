@@ -5,19 +5,22 @@ import { CaptureForm, type CaptureDraft } from "./capture-form";
 import { Timeline } from "./timeline";
 import { Report } from "./report";
 import { inspect } from "@/lib/client/sse";
+import { useLang, useT } from "@/lib/i18n";
 import type { InspectionEvent } from "@/lib/pipeline/run";
 import type { JudgeResult } from "@/lib/pipeline/judge";
-import type { ReleveTemperature } from "@/lib/schemas";
+import type { TemperatureReading } from "@/lib/schemas";
 
 type Phase = "capture" | "running" | "report";
 
-/** Écran unique : capture → timeline agentique → rapport. */
+/** Single screen flow: capture → agentic timeline → report. */
 export function Inspection() {
+  const t = useT();
+  const { lang } = useLang();
   const [phase, setPhase] = useState<Phase>("capture");
   const [draft, setDraft] = useState<CaptureDraft | null>(null);
   const [events, setEvents] = useState<InspectionEvent[]>([]);
   const [result, setResult] = useState<JudgeResult | null>(null);
-  const [temperatures, setTemperatures] = useState<ReleveTemperature[]>([]);
+  const [temperatures, setTemperatures] = useState<TemperatureReading[]>([]);
   const [totalMs, setTotalMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
@@ -33,15 +36,16 @@ export function Inspection() {
     try {
       for await (const e of inspect(
         {
-          etablissement: d.etablissement,
+          establishment: d.establishment,
           photos: d.photos.map((p) => ({ ref: p.ref, dataUrl: p.dataUrl, hint: p.hint || undefined })),
           temperatures: d.temperatures,
-          declaratif: d.declaratif,
+          statement: d.statement,
+          lang,
         },
         abort.current.signal,
       )) {
         setEvents((list) => [...list, e]);
-        if (e.type === "temperatures:done") setTemperatures(e.releves);
+        if (e.type === "temperatures:done") setTemperatures(e.readings);
         if (e.type === "judge:done") setResult(e.result);
         if (e.type === "error") setError(e.message);
         if (e.type === "end") setTotalMs(e.totalMs);
@@ -63,7 +67,7 @@ export function Inspection() {
   if (phase === "capture") return <CaptureForm onSubmit={start} />;
 
   if (phase === "report" && result && draft)
-    return <Report etablissement={draft.etablissement} result={result} photos={draft.photos} temperatures={temperatures} totalMs={totalMs} onReset={reset} />;
+    return <Report establishment={draft.establishment} result={result} photos={draft.photos} temperatures={temperatures} totalMs={totalMs} onReset={reset} />;
 
   return (
     <>
@@ -71,10 +75,10 @@ export function Inspection() {
       {error && (
         <div className="mx-auto w-full max-w-3xl px-4">
           <div className="rounded-lg border border-n4/40 bg-n4/10 p-4 text-sm">
-            <p className="font-medium text-n4">L&apos;inspection a échoué</p>
+            <p className="font-medium text-n4">{t.failed}</p>
             <p className="mt-1 text-ink-2">{error}</p>
             <button onClick={reset} className="mt-3 rounded-full border border-line bg-paper-2 px-4 py-1.5 text-sm hover:bg-paper-3">
-              Revenir à la capture
+              {t.backToCapture}
             </button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-/** Recompresse une image côté navigateur (≤ maxSide px, JPEG) avant envoi au serveur. */
+/** Recompresses an image in the browser (≤ maxSide px, JPEG) before upload. */
 export async function compressImage(file: File, maxSide = 1600, quality = 0.82): Promise<string> {
   const bitmap = await createImageBitmap(file).catch(() => null);
   if (!bitmap) return fileToDataUrl(file);

@@ -1,112 +1,103 @@
-import type { ReleveTemperature } from "@/lib/schemas";
+import type { TemperatureReading } from "@/lib/schemas";
 
 /**
- * Règles déterministes de conformité des températures (arrêté du 21 décembre 2009).
- * Le modèle ne fait qu'extraire ; c'est ici que la limite et le verdict sont décidés.
+ * Deterministic temperature compliance rules (French order of 21 December 2009).
+ * The model only transcribes; the limit and the verdict are decided here.
  */
 
-export type TypeEnceinte = ReleveTemperature["type"];
+export type Kind = TemperatureReading["kind"];
 
-/** Sous-catégorie de froid positif : la limite dépend de la denrée. */
-export type Denree =
-  | "viande_hachee"
-  | "viande"
-  | "poisson"
-  | "plat_cuisine"
-  | "denree_perissable"
-  | "inconnue";
+/** Chilled sub-category: the limit depends on the foodstuff. */
+export type Foodstuff = "minced_meat" | "meat" | "fish" | "cooked_dish" | "perishable" | "unknown";
 
-export interface ReleveBrut {
-  equipement: string;
-  type: TypeEnceinte;
-  denree?: Denree | null;
-  valeur_c: number;
-  horodatage?: string | null;
+export interface RawReading {
+  equipment: string;
+  kind: Kind;
+  foodstuff?: Foodstuff | null;
+  value_c: number;
+  timestamp?: string | null;
 }
 
-export interface Limite {
-  limite_c: number;
-  /** "max" : la valeur doit être ≤ limite ; "min" : ≥ limite. */
-  sens: "max" | "min";
-  libelle: string;
+export interface Limit {
+  limit_c: number;
+  /** "max": value must be ≤ limit; "min": value must be ≥ limit. */
+  direction: "max" | "min";
+  label: string;
 }
 
-export function limitePour(type: TypeEnceinte, denree: Denree = "inconnue"): Limite {
-  switch (type) {
-    case "froid_positif":
-      switch (denree) {
-        case "viande_hachee":
-          return { limite_c: 2, sens: "max", libelle: "viandes hachées ≤ +2 °C" };
-        case "poisson":
-          return { limite_c: 2, sens: "max", libelle: "poissons frais 0 à +2 °C" };
-        case "plat_cuisine":
-          return { limite_c: 3, sens: "max", libelle: "plats cuisinés liaison froide ≤ +3 °C" };
-        case "viande":
-        case "denree_perissable":
-        case "inconnue":
+export function limitFor(kind: Kind, foodstuff: Foodstuff = "unknown"): Limit {
+  switch (kind) {
+    case "chilled":
+      switch (foodstuff) {
+        case "minced_meat":
+          return { limit_c: 2, direction: "max", label: "minced meat ≤ +2 °C" };
+        case "fish":
+          return { limit_c: 2, direction: "max", label: "fresh fish 0 to +2 °C" };
+        case "cooked_dish":
+          return { limit_c: 3, direction: "max", label: "cook-chill dishes ≤ +3 °C" };
         default:
-          return { limite_c: 4, sens: "max", libelle: "denrées périssables ≤ +4 °C" };
+          return { limit_c: 4, direction: "max", label: "perishable foods ≤ +4 °C" };
       }
-    case "froid_negatif":
-      return { limite_c: -18, sens: "max", libelle: "surgelés ≤ −18 °C" };
-    case "chaud":
-      return { limite_c: 63, sens: "min", libelle: "liaison chaude ≥ +63 °C" };
-    case "refroidissement":
-      return { limite_c: 10, sens: "max", libelle: "refroidissement rapide : ≤ +10 °C en moins de 2 h" };
-    case "autre":
+    case "frozen":
+      return { limit_c: -18, direction: "max", label: "frozen foods ≤ −18 °C" };
+    case "hot_holding":
+      return { limit_c: 63, direction: "min", label: "hot holding ≥ +63 °C" };
+    case "cooling":
+      return { limit_c: 10, direction: "max", label: "rapid cooling: ≤ +10 °C within 2 h" };
     default:
-      return { limite_c: 4, sens: "max", libelle: "denrées périssables ≤ +4 °C (par défaut)" };
+      return { limit_c: 4, direction: "max", label: "perishable foods ≤ +4 °C (default)" };
   }
 }
 
-/** Tolérance d'ouverture de porte sur froid positif (référentiel § 2) : +2 °C ponctuels. */
-const TOLERANCE_FROID_POSITIF = 2;
+/** Door-opening tolerance on chilled units (reference § 2): +2 °C, isolated. */
+const CHILLED_TOLERANCE = 2;
 
-export function estConforme(valeur: number, limite: Limite): boolean {
-  return limite.sens === "max" ? valeur <= limite.limite_c : valeur >= limite.limite_c;
+export function isCompliant(value: number, limit: Limit): boolean {
+  return limit.direction === "max" ? value <= limit.limit_c : value >= limit.limit_c;
 }
 
-/** Applique limites, verdicts et détection de dérive persistante (≥ 2 relevés consécutifs hors limite). */
-export function qualifier(bruts: ReleveBrut[]): ReleveTemperature[] {
-  const out: ReleveTemperature[] = bruts.map((b) => {
-    const limite = limitePour(b.type, b.denree ?? "inconnue");
-    const conforme = estConforme(b.valeur_c, limite);
-    let commentaire: string | undefined;
-    if (!conforme) {
-      const ecart = limite.sens === "max" ? b.valeur_c - limite.limite_c : limite.limite_c - b.valeur_c;
-      const tolerable = b.type === "froid_positif" && ecart <= TOLERANCE_FROID_POSITIF;
-      commentaire = `écart de ${ecart.toFixed(1)} °C par rapport à la limite (${limite.libelle})${tolerable ? ", dans la tolérance ponctuelle d'ouverture de porte si isolé et documenté" : ""}`;
+/** Applies limits, verdicts and persistent-drift detection (≥ 2 consecutive out-of-range readings). */
+export function qualify(raw: RawReading[]): TemperatureReading[] {
+  const out: TemperatureReading[] = raw.map((r) => {
+    const limit = limitFor(r.kind, r.foodstuff ?? "unknown");
+    const compliant = isCompliant(r.value_c, limit);
+    let note: string | undefined;
+    if (!compliant) {
+      const gap = limit.direction === "max" ? r.value_c - limit.limit_c : limit.limit_c - r.value_c;
+      const tolerable = r.kind === "chilled" && gap <= CHILLED_TOLERANCE;
+      note = `${gap.toFixed(1)} °C beyond the limit (${limit.label})${tolerable ? "; within the isolated door-opening tolerance if documented" : ""}`;
     }
     return {
-      equipement: b.equipement,
-      type: b.type,
-      valeur_c: b.valeur_c,
-      horodatage: b.horodatage ?? undefined,
-      limite_c: limite.limite_c,
-      conforme,
-      commentaire,
+      equipment: r.equipment,
+      kind: r.kind,
+      value_c: r.value_c,
+      timestamp: r.timestamp ?? undefined,
+      limit_c: limit.limit_c,
+      compliant,
+      note,
+      persistent_drift: false,
     };
   });
 
-  // Dérive persistante par équipement, dans l'ordre fourni (supposé chronologique).
-  const parEquipement = new Map<string, ReleveTemperature[]>();
+  // Persistent drift per unit, in the order given (assumed chronological).
+  const byUnit = new Map<string, TemperatureReading[]>();
   for (const r of out) {
-    const k = r.equipement.trim().toLowerCase();
-    parEquipement.set(k, [...(parEquipement.get(k) ?? []), r]);
+    const k = r.equipment.trim().toLowerCase();
+    byUnit.set(k, [...(byUnit.get(k) ?? []), r]);
   }
-  for (const releves of parEquipement.values()) {
-    let serie = 0;
-    for (const r of releves) {
-      serie = r.conforme ? 0 : serie + 1;
-      if (serie >= 2) {
-        r.commentaire = `${r.commentaire ?? ""} — DÉRIVE PERSISTANTE : ${serie} relevés consécutifs hors limite, rupture de la chaîne du froid/chaud à retenir`.replace(/^ — /, "");
+  for (const readings of byUnit.values()) {
+    let streak = 0;
+    for (const r of readings) {
+      streak = r.compliant ? 0 : streak + 1;
+      if (streak >= 2) {
+        r.persistent_drift = true;
+        r.note = `${r.note ?? ""}; PERSISTENT DRIFT: ${streak} consecutive readings out of range — cold/hot chain failure`.replace(/^; /, "");
       }
     }
-    const nc = releves.filter((r) => !r.conforme).length;
-    if (nc >= 2 && releves.length >= 3 && nc / releves.length >= 0.5) {
-      const last = releves[releves.length - 1];
-      if (!/DÉRIVE PERSISTANTE/.test(last.commentaire ?? ""))
-        last.commentaire = `${last.commentaire ?? ""} — ${nc}/${releves.length} relevés hors limite sur la période`.replace(/^ — /, "");
+    const bad = readings.filter((r) => !r.compliant).length;
+    if (bad >= 2 && readings.length >= 3 && bad / readings.length >= 0.5) {
+      const last = readings[readings.length - 1];
+      if (!last.persistent_drift) last.note = `${last.note ?? ""}; ${bad}/${readings.length} readings out of range over the period`.replace(/^; /, "");
     }
   }
   return out;

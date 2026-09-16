@@ -1,15 +1,34 @@
-# Retour d'expérience — Nebius Token Factory & NVIDIA Nemotron
+# Feedback — Nebius Token Factory & NVIDIA Nemotron
 
-Journal tenu au fil du développement d'Argus (livrable du hackathon). Chaque entrée : date, outil, ce qui a marché, ce qui a coincé.
+Kept as a running log while building Argus (a hackathon deliverable). Each entry: date, tool,
+what worked, what got in the way.
 
-## 2026-09-16 — Démarrage
-- Catalogue : la page publique du catalogue Token Factory se rend côté client, impossible à lire sans navigateur ; les identifiants de modèles ont dû être vérifiés via les billets de blog Nebius et la fiche NVIDIA. Une page statique listant les IDs exacts ferait gagner du temps.
-- Architecture retenue : Nano Omni (vision + audio) → Nano 30B (extraction JSON) → Ultra 550B (jugement), repli Super 120B. Un seul client OpenAI-compatible pour les quatre.
+## 2026-09-16 — Getting started
+- **Catalogue discoverability.** The public catalogue page renders client-side, so it cannot be
+  read without a browser; the model ids had to be checked through blog posts and NVIDIA model
+  cards. A static page listing the exact ids would save time.
+- **Model ids differ from the marketing names.** Actual ids via `GET /models`:
+  `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, `nvidia/nemotron-3-super-120b-a12b`,
+  `nvidia/Nemotron-3-Ultra-550b-a55b`, `nvidia/Nemotron-3_5-Lightning`. Casing is inconsistent
+  from one model to the next.
+- **No Nemotron accepts image input on Token Factory** (`400 This model does not support image
+  input` for Nano, Super, Ultra and Lightning). Nemotron 3 Nano Omni and Nemotron Nano 2 VL,
+  both announced on the Nebius blog, are absent from the catalogue (23 models at the time of
+  writing). Argus uses `openbmb/MiniCPM-V-4_5` for perception (0.9-3 s per photo, decent) and
+  keeps Nemotron for extraction and judgement.
 
-## 2026-09-16 — Premier pipeline bout en bout
-- **Identifiants de modèles** : ceux de la doc marketing ne sont pas ceux de l'API. Réels via `GET /models` : `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, `nvidia/nemotron-3-super-120b-a12b`, `nvidia/Nemotron-3-Ultra-550b-a55b`, `nvidia/Nemotron-3_5-Lightning`. La casse varie d'un modèle à l'autre.
-- **Aucun Nemotron n'accepte d'image sur Token Factory** (`400 This model does not support image input` pour Nano, Super, Ultra, Lightning). Nano Omni et Nano 2 VL, annoncés sur le blog, sont absents du catalogue (23 modèles). Argus utilise `openbmb/MiniCPM-V-4_5` pour la perception (0,9-2 s par photo, correct) et garde Nemotron pour l'extraction et le jugement.
-- **Raisonnement Nemotron** : renvoyé dans un champ `message.reasoning` non standard (pas dans `content`), pratique pour l'afficher. En mode thinking, Nano 30B *agrège* des données tabulaires (14 relevés → 3) ; `chat_template_kwargs: {enable_thinking: false}` (paramètre vLLM, transmis tel quel) rétablit la transcription fidèle et divise la latence par deux. `reasoning_effort: "none"` est accepté mais renvoie un `content` vide.
-- **Ultra 550B** : 29-45 s pour un jugement de ~5 k tokens d'entrée, 100 % de disponibilité sur 4 appels. Le repli Super n'a pas été nécessaire.
-- **Fiabilité métier** : Nano a inversé la logique de conformité sur les températures négatives (−19 °C jugé non conforme à ≤ −18 °C). Leçon générale : les modèles extraient, le code décide (limites et verdicts dans `src/lib/rules/`).
-- Les modèles renvoient `null` pour les champs optionnels : schémas zod en `.nullish()` obligatoires.
+## 2026-09-16 — First end-to-end pipeline
+- **Nemotron reasoning** comes back in a non-standard `message.reasoning` field (not in
+  `content`) — handy for displaying it. In thinking mode, Nano 30B *aggregates* tabular data
+  (14 readings collapsed to 3); `chat_template_kwargs: {enable_thinking: false}` (a vLLM
+  parameter, passed through as is) restores faithful transcription and halves latency.
+  `reasoning_effort: "none"` is accepted but returns an empty `content`.
+- **Ultra 550B**: 29-45 s for a judgement over ~5k input tokens, 100 % availability over the
+  first dozen calls. The Super fallback never triggered.
+- **Domain reliability**: Nano inverted the compliance logic on negative temperatures (−19 °C
+  judged non-compliant against ≤ −18 °C). General lesson: models extract, code decides
+  (limits and verdicts live in `src/lib/rules/`).
+- Models return `null` for optional fields: zod schemas must be `.nullish()`.
+- Enum values must be listed in the JSON template of the prompt, otherwise Ultra writes free
+  text ("chambre froide", "24 h"); a lenient enum with aliases on the parsing side absorbs the
+  rest.

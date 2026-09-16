@@ -1,49 +1,45 @@
-import { MODELS, nebius, extractJson } from "@/lib/nebius";
+import { MODELS, nebius, extractJson, languageInstruction, type Lang } from "@/lib/nebius";
 import { Observation } from "@/lib/schemas";
 
-const SYSTEM = `Tu es un inspecteur sanitaire (DDPP) spécialisé en restauration commerciale.
-On te montre une photo prise dans un établissement. Tu décris ce que tu VOIS, sans inventer.
-Cherche activement : denrées au sol, cartons dans les enceintes froides, produits non filmés,
-cru et cuit mélangés, absence d'étiquetage, joints de porte sales ou abîmés, givre, carrelage
-cassé, peinture écaillée, moisissures, graisse accumulée, poubelles ouvertes, lave-mains
-encombré ou absent, planches en bois brut, ustensiles détériorés, traces de nuisibles,
-produits d'entretien près des denrées, tenue du personnel, fenêtres ouvertes sans moustiquaire.
-Note aussi les points positifs (propreté, rangement, affichages).
+const SYSTEM = `You are a food-safety inspector (French DDPP) specialised in commercial restaurants.
+You are shown one photo taken inside an establishment. Describe what you SEE, never invent.
+Actively look for: food on the floor, cardboard inside cold units, unwrapped products,
+raw and cooked mixed, missing labels, dirty or damaged door gaskets, frost build-up, broken
+tiles, flaking paint, mould, grease build-up, open bins, cluttered or missing hand-wash sink,
+raw wood boards or surfaces, damaged utensils, pest traces, cleaning chemicals near food,
+staff attire (no hair cover, personal items), open windows without insect screens.
+Also note the positives (cleanliness, tidiness, signage).
 
-Réponds UNIQUEMENT avec un objet JSON de cette forme :
+Reply ONLY with a JSON object of this shape:
 {
-  "zone": "reception|stockage_sec|stockage_froid|legumerie|preparation_froide|preparation_chaude|cuisson|plonge|dechets|vestiaires_sanitaires|salle|exterieur|inconnue",
-  "description": "2-3 phrases factuelles",
-  "equipements": ["..."],
-  "anomalies": [{"constat": "...", "localisation": "où dans l'image", "confiance": 0.0-1.0}],
-  "points_positifs": ["..."]
+  "zone": "receiving|dry_storage|cold_storage|vegetable_prep|cold_prep|hot_prep|cooking|dishwashing|waste|staff_facilities|dining_room|outdoor|general",
+  "description": "2-3 factual sentences",
+  "equipment": ["..."],
+  "anomalies": [{"finding": "...", "location": "where in the image", "confidence": 0.0-1.0}],
+  "positives": ["..."]
 }`;
 
 export interface PerceiveInput {
-  /** Data URL (data:image/jpeg;base64,...) ou URL https publique. */
+  /** Data URL (data:image/jpeg;base64,...) or public https URL. */
   image: string;
-  /** Contexte libre fourni par le gérant (ex. « chambre froide n°2 »). */
+  /** Free caption given by the operator (e.g. "walk-in fridge #2"). */
   hint?: string;
+  lang: Lang;
 }
 
-/** Étape 1 — perception d'une photo par Nemotron Nano Omni. */
+/** Step 1 — photo perception. */
 export async function perceiveImage(input: PerceiveInput): Promise<Observation> {
   const res = await nebius.chat.completions.create({
     model: MODELS.perception,
     temperature: 0.2,
     max_tokens: 1200,
     messages: [
-      { role: "system", content: SYSTEM },
+      { role: "system", content: `${SYSTEM}\n${languageInstruction(input.lang)}` },
       {
         role: "user",
         content: [
           { type: "image_url", image_url: { url: input.image } },
-          {
-            type: "text",
-            text: input.hint
-              ? `Contexte donné par le gérant : ${input.hint}. Analyse la photo.`
-              : "Analyse la photo.",
-          },
+          { type: "text", text: input.hint ? `Operator's caption: ${input.hint}. Analyse the photo.` : "Analyse the photo." },
         ],
       },
     ],
@@ -52,36 +48,33 @@ export async function perceiveImage(input: PerceiveInput): Promise<Observation> 
   return Observation.parse(extractJson(text));
 }
 
-const SYSTEM_AUDIO = `Tu écoutes une note vocale d'un restaurateur qui décrit un problème ou une
-situation dans sa cuisine. Transcris fidèlement en français puis extrais les faits utiles à une
-inspection sanitaire (équipement concerné, température, durée, pratique décrite).
-Réponds UNIQUEMENT en JSON : {"transcription": "...", "faits": ["..."]}`;
+const SYSTEM_AUDIO = `You listen to a voice note from a restaurant operator describing a problem or a
+situation in their kitchen. Transcribe it faithfully, then extract the facts useful to a food-safety
+inspection (equipment concerned, temperature, duration, practice described).
+Reply ONLY in JSON: {"transcript": "...", "facts": ["..."]}`;
 
-export interface AudioNote {
-  transcription: string;
-  faits: string[];
+export interface VoiceNote {
+  transcript: string;
+  facts: string[];
 }
 
-/** Étape 1 bis — note vocale transcrite et structurée par Nemotron Nano Omni. */
-export async function perceiveAudio(
-  audioBase64: string,
-  format: "wav" | "mp3",
-): Promise<AudioNote> {
+/** Step 1b — voice note transcribed and structured (requires an audio-capable model). */
+export async function perceiveAudio(audioBase64: string, format: "wav" | "mp3", lang: Lang): Promise<VoiceNote> {
   const res = await nebius.chat.completions.create({
     model: MODELS.perception,
     temperature: 0.1,
     max_tokens: 800,
     messages: [
-      { role: "system", content: SYSTEM_AUDIO },
+      { role: "system", content: `${SYSTEM_AUDIO}\n${languageInstruction(lang)}` },
       {
         role: "user",
         content: [
           { type: "input_audio", input_audio: { data: audioBase64, format } },
-          { type: "text", text: "Transcris et structure cette note vocale." },
+          { type: "text", text: "Transcribe and structure this voice note." },
         ],
       },
     ],
   });
   const text = res.choices[0]?.message?.content ?? "";
-  return extractJson<AudioNote>(text);
+  return extractJson<VoiceNote>(text);
 }

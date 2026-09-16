@@ -1,155 +1,151 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { MODELS, nebius, extractJson } from "@/lib/nebius";
-import { Rapport, type Observation, type ReleveTemperature } from "@/lib/schemas";
-import type { AudioNote } from "./perceive";
+import { MODELS, nebius, extractJson, languageInstruction, type Lang } from "@/lib/nebius";
+import { Report, type Observation, type TemperatureReading } from "@/lib/schemas";
+import type { VoiceNote } from "./perceive";
 
-export interface Dossier {
-  etablissement: { nom: string; type: "restauration_commerciale" };
+export interface CaseFile {
+  establishment: { name: string; type: "commercial_restaurant" };
   photos: { ref: string; hint?: string; observation: Observation }[];
-  temperatures: ReleveTemperature[];
-  notesVocales: AudioNote[];
-  /** Déclaratif du gérant : PMS existant ? formation ? etc. */
-  declaratif?: string;
+  temperatures: TemperatureReading[];
+  voiceNotes: VoiceNote[];
+  /** Operator's statement: existing PMS? training? etc. */
+  statement?: string;
+  lang: Lang;
 }
 
-let referentielCache: string | undefined;
-export async function loadReferentiel(): Promise<string> {
-  if (!referentielCache) {
-    referentielCache = await readFile(
-      path.join(process.cwd(), "src/lib/referentiel/restauration-commerciale.md"),
-      "utf8",
-    );
+let referenceCache: string | undefined;
+export async function loadReference(): Promise<string> {
+  if (!referenceCache) {
+    referenceCache = await readFile(path.join(process.cwd(), "src/lib/reference/commercial-restaurant.md"), "utf8");
   }
-  return referentielCache;
+  return referenceCache;
 }
 
-function buildSystem(referentiel: string): string {
-  return `Tu es un inspecteur sanitaire expérimenté de la DDPP, en mission d'inspection dans un
-établissement de restauration commerciale. Tu appliques STRICTEMENT le référentiel ci-dessous.
-Tu ne retiens que des non-conformités étayées par une preuve du dossier (photo, relevé,
-note vocale, déclaratif). Tu ne DÉDUIS jamais une non-conformité d'une absence de preuve :
-ce qui n'a pas été observé ni déclaré va dans "points_a_verifier" (ce que tu contrôlerais
-sur place), jamais dans "non_conformites" ni dans "points_forts".
+function buildSystem(reference: string, lang: Lang): string {
+  return `You are an experienced food-safety inspector of the French DDPP, on an inspection visit in a
+commercial restaurant. You apply the reference below STRICTLY.
+You only retain non-compliances backed by evidence in the case file (photo, temperature reading,
+voice note, operator statement). You NEVER infer a non-compliance from a lack of evidence:
+what was neither observed nor declared goes into "to_verify" (what you would check on site),
+never into "findings" nor into "strengths".
 
-Règles de rédaction impératives :
-- UNE SEULE non-conformité par sujet : un équipement de froid en dérive = une NC qui cite
-  tous ses relevés (ex. « 5 relevés consécutifs de 6,5 à 7,4 °C du 14 au 16/09 »), jamais
-  une NC par relevé. Sévérité = celle du relevé le plus grave.
-- Une anomalie photo dont la confiance est < 0,6, ou qui te paraît invraisemblable dans le
-  contexte, va dans "points_a_verifier" avec la mention « à confirmer sur place », pas dans
-  "non_conformites".
-- 12 non-conformités maximum ; fusionne ce qui relève du même point de grille. Chaque non-conformité cite le point de la grille (ex. B3) et le
-texte (ex. CE 852/2004 annexe II chap. IX). Tu qualifies la sévérité selon le barème § 4 et
-tu prédis la note Alim'confiance en appliquant les règles § 4 à la lettre. Tu rédiges la
-synthèse comme dans un vrai rapport d'inspection : factuel, précis, sans jugement de valeur.
+Mandatory writing rules:
+- ONE finding per subject: a cold unit drifting = one finding citing all its readings
+  (e.g. "5 consecutive readings from 6.5 to 7.4 °C on 14-16/09"), never one finding per reading.
+  Severity = that of the worst reading.
+- A photo anomaly with confidence < 0.6, or that looks implausible in context, goes into
+  "to_verify" with the mention "to confirm on site", not into "findings".
+- 12 findings maximum; merge what belongs to the same grid point.
+- Each finding cites the grid point (e.g. B3) and the text (e.g. EC 852/2004 Annex II ch. IX).
+- Qualify severity with the § 4 scale and predict the Alim'confiance grade by applying the § 4
+  rules to the letter. Write the summary like a real inspection report: factual, precise, no
+  value judgement.
+${languageInstruction(lang)}
 
-=== RÉFÉRENTIEL ===
-${referentiel}
-=== FIN DU RÉFÉRENTIEL ===
+=== REFERENCE ===
+${reference}
+=== END OF REFERENCE ===
 
-Réponds UNIQUEMENT avec un objet JSON :
+Reply ONLY with a JSON object:
 {
-  "note_predite": "tres_satisfaisant|satisfaisant|a_ameliorer|a_corriger_de_maniere_urgente",
-  "justification_note": "règle § 4 appliquée et décompte des non-conformités par sévérité",
-  "synthese_inspecteur": "8-12 lignes, style rapport officiel",
-  "non_conformites": [{
+  "predicted_grade": "very_satisfactory|satisfactory|to_improve|urgent_correction",
+  "grade_rationale": "§ 4 rule applied and count of findings per severity",
+  "inspector_summary": "8-12 lines, official report style",
+  "findings": [{
     "id": "NC-01",
-    "titre": "court",
-    "zone": "reception|stockage_sec|stockage_froid|legumerie|preparation_froide|preparation_chaude|cuisson|plonge|dechets|vestiaires_sanitaires|salle|exterieur|inconnue (inconnue pour les non-conformités documentaires ou générales)",
-    "severite": "mineure|majeure|critique",
-    "constat": "ce qui a été observé, précis",
-    "reference_reglementaire": "point de grille + texte",
-    "risque": "danger pour le consommateur",
-    "preuve": {"type": "photo|temperature|audio|declaratif", "ref": "identifiant de la preuve"},
-    "action_corrective": "action concrète",
-    "delai": "immediat|24h|7j|30j (valeur exacte)"
+    "title": "short",
+    "zone": "receiving|dry_storage|cold_storage|vegetable_prep|cold_prep|hot_prep|cooking|dishwashing|waste|staff_facilities|dining_room|outdoor|general (general for documentary or establishment-wide findings)",
+    "severity": "minor|major|critical",
+    "observation": "what was observed, precise",
+    "regulatory_reference": "grid point + text",
+    "risk": "hazard for the consumer",
+    "evidence": {"type": "photo|temperature|audio|declared", "ref": "evidence identifier"},
+    "corrective_action": "concrete action",
+    "deadline": "immediate|24h|7d|30d (exact value)"
   }],
-  "points_forts": ["uniquement ce qui est observé ou déclaré"],
-  "points_a_verifier": ["contrôles à faire sur place, sans preuve dans le dossier"],
-  "risque_fermeture": "faible|modere|eleve"
+  "strengths": ["only what was observed or declared"],
+  "to_verify": ["on-site checks with no evidence in the file"],
+  "closure_risk": "low|moderate|high"
 }`;
 }
 
-function buildDossierText(d: Dossier): string {
+function buildCaseText(c: CaseFile): string {
   const lines: string[] = [];
-  lines.push(`# Dossier d'inspection — ${d.etablissement.nom} (restauration commerciale)`);
-  lines.push("\n## Photos analysées");
-  for (const p of d.photos) {
-    lines.push(`\n### Preuve ${p.ref}${p.hint ? ` — contexte : ${p.hint}` : ""}`);
-    lines.push(`Zone : ${p.observation.zone}`);
-    lines.push(`Description : ${p.observation.description}`);
-    if (p.observation.equipements.length)
-      lines.push(`Équipements : ${p.observation.equipements.join(", ")}`);
+  lines.push(`# Inspection case file — ${c.establishment.name} (commercial restaurant)`);
+  lines.push("\n## Photos analysed");
+  for (const p of c.photos) {
+    lines.push(`\n### Evidence ${p.ref}${p.hint ? ` — caption: ${p.hint}` : ""}`);
+    lines.push(`Zone: ${p.observation.zone}`);
+    lines.push(`Description: ${p.observation.description}`);
+    if (p.observation.equipment.length) lines.push(`Equipment: ${p.observation.equipment.join(", ")}`);
     for (const a of p.observation.anomalies)
-      lines.push(
-        `- Anomalie (confiance ${a.confiance.toFixed(2)}) : ${a.constat}${a.localisation ? ` [${a.localisation}]` : ""}`,
-      );
-    for (const pp of p.observation.points_positifs) lines.push(`- Point positif : ${pp}`);
+      lines.push(`- Anomaly (confidence ${a.confidence.toFixed(2)}): ${a.finding}${a.location ? ` [${a.location}]` : ""}`);
+    for (const pos of p.observation.positives) lines.push(`- Positive: ${pos}`);
   }
-  lines.push("\n## Relevés de température");
-  if (!d.temperatures.length) lines.push("Aucun relevé fourni (absence d'enregistrement à signaler, C3).");
-  d.temperatures.forEach((t, i) =>
+  lines.push("\n## Temperature readings");
+  if (!c.temperatures.length) lines.push("No readings provided (lack of records to be reported, C3).");
+  c.temperatures.forEach((t, i) =>
     lines.push(
-      `- T-${String(i + 1).padStart(2, "0")} ${t.equipement} (${t.type}) : ${t.valeur_c} °C${t.horodatage ? ` le ${t.horodatage}` : ""}, limite ${t.limite_c ?? "?"} °C → ${t.conforme ? "conforme" : "NON CONFORME"}${t.commentaire ? ` — ${t.commentaire}` : ""}`,
+      `- T-${String(i + 1).padStart(2, "0")} ${t.equipment} (${t.kind}): ${t.value_c} °C${t.timestamp ? ` on ${t.timestamp}` : ""}, limit ${t.limit_c ?? "?"} °C → ${t.compliant ? "compliant" : "OUT OF RANGE"}${t.note ? ` — ${t.note}` : ""}`,
     ),
   );
-  lines.push("\n## Notes vocales du gérant");
-  if (!d.notesVocales.length) lines.push("Aucune.");
-  d.notesVocales.forEach((n, i) => {
-    lines.push(`- A-${String(i + 1).padStart(2, "0")} « ${n.transcription} »`);
-    n.faits.forEach((f) => lines.push(`  · fait : ${f}`));
+  lines.push("\n## Operator voice notes");
+  if (!c.voiceNotes.length) lines.push("None.");
+  c.voiceNotes.forEach((n, i) => {
+    lines.push(`- A-${String(i + 1).padStart(2, "0")} "${n.transcript}"`);
+    n.facts.forEach((f) => lines.push(`  · fact: ${f}`));
   });
-  lines.push("\n## Déclaratif");
-  lines.push(d.declaratif?.trim() || "Aucune information sur le PMS, la formation ou la traçabilité.");
+  lines.push("\n## Operator statement");
+  lines.push(c.statement?.trim() || "No information about the PMS, training or traceability.");
   return lines.join("\n");
 }
 
 export interface JudgeResult {
-  rapport: Rapport;
-  modele: string;
-  dureeMs: number;
-  dossierTexte: string;
-  /** Chaîne de raisonnement renvoyée par Nemotron (champ `reasoning`), pour la timeline. */
-  raisonnement?: string;
+  report: Report;
+  model: string;
+  durationMs: number;
+  caseText: string;
+  /** Reasoning chain returned by Nemotron (`reasoning` field), for the timeline. */
+  reasoning?: string;
   usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 }
 
-/** Étape 3 — jugement réglementaire par Nemotron Ultra, repli sur Super. */
+/** Step 3 — regulatory judgement by Nemotron Ultra, falling back to Super. */
 export async function judge(
-  dossier: Dossier,
-  onEvent?: (e: { type: "start" | "fallback" | "done"; modele: string; ms?: number }) => void,
+  caseFile: CaseFile,
+  onEvent?: (e: { type: "start" | "fallback" | "done"; model: string; ms?: number }) => void,
 ): Promise<JudgeResult> {
-  const referentiel = await loadReferentiel();
-  const system = buildSystem(referentiel);
-  const dossierTexte = buildDossierText(dossier);
+  const reference = await loadReference();
+  const system = buildSystem(reference, caseFile.lang);
+  const caseText = buildCaseText(caseFile);
 
-  const attempt = async (modele: string) => {
+  const attempt = async (model: string) => {
     const t0 = Date.now();
-    onEvent?.({ type: "start", modele });
+    onEvent?.({ type: "start", model });
     const res = await nebius.chat.completions.create({
-      model: modele,
+      model,
       temperature: 0.1,
       max_tokens: 16000,
       messages: [
         { role: "system", content: system },
-        { role: "user", content: dossierTexte },
+        { role: "user", content: caseText },
       ],
     });
     const msg = res.choices[0]?.message as { content?: string | null; reasoning?: string } | undefined;
     if (res.choices[0]?.finish_reason === "length")
-      throw new Error(`réponse tronquée (max_tokens), ${res.usage?.completion_tokens} tokens générés`);
-    const rapport = Rapport.parse(extractJson(msg?.content ?? ""));
+      throw new Error(`reply truncated (max_tokens), ${res.usage?.completion_tokens} tokens generated`);
+    const report = Report.parse(extractJson(msg?.content ?? ""));
     const ms = Date.now() - t0;
-    onEvent?.({ type: "done", modele, ms });
-    return { rapport, modele, dureeMs: ms, dossierTexte, raisonnement: msg?.reasoning, usage: res.usage };
+    onEvent?.({ type: "done", model, ms });
+    return { report, model, durationMs: ms, caseText, reasoning: msg?.reasoning, usage: res.usage };
   };
 
   try {
     return await attempt(MODELS.judge);
   } catch (err) {
-    onEvent?.({ type: "fallback", modele: MODELS.judgeFallback });
-    console.warn(`[argus] ${MODELS.judge} a échoué (${(err as Error).message}), repli sur ${MODELS.judgeFallback}`);
+    onEvent?.({ type: "fallback", model: MODELS.judgeFallback });
+    console.warn(`[argus] ${MODELS.judge} failed (${(err as Error).message}), falling back to ${MODELS.judgeFallback}`);
     return await attempt(MODELS.judgeFallback);
   }
 }
