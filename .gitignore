@@ -47,3 +47,4 @@ samples/**/*.jpeg
 samples/**/*.png
 samples/**/*.webp
 samples/**/report.json
+samples/**/pms.json

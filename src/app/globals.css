@@ -97,3 +97,27 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .argus-pulse, .argus-rise { animation: none; }
 }
+
+/* Print: the report and the plan become a clean A4 document (Download PDF = browser "Save as PDF"). */
+@media print {
+  :root {
+    --paper: #ffffff;
+    --paper-2: #ffffff;
+    --paper-3: #f3f1ec;
+    --ink: #111;
+    --ink-2: #333;
+    --ink-3: #666;
+    --line: #cfcac0;
+    --accent: #0f5c5c;
+  }
+  @page { size: A4; margin: 14mm 12mm; }
+  html, body { background: #fff !important; color: #111 !important; }
+  nav, .print-hidden { display: none !important; }
+  .print-visible { display: block !important; }
+  .print-root { max-width: none !important; padding: 0 !important; gap: 22px !important; }
+  .print-break-before { break-before: page; }
+  .print-avoid-break, article li, tr { break-inside: avoid; }
+  .argus-rise { animation: none !important; opacity: 1 !important; transform: none !important; }
+  a[href]::after { content: none; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

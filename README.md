@@ -25,12 +25,14 @@ from hands-on experience in food-hygiene compliance, not from a generic prompt.
 | 2. Extraction | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | Transcribes messy temperature logs to JSON (reasoning off for fidelity) |
 | 2b. Rules | deterministic code | Applies the limits of the French order of 21/12/2009, detects persistent drift |
 | 3. Judgement | `nvidia/Nemotron-3-Ultra-550b-a55b` (fallback `nvidia/nemotron-3-super-120b-a12b`) | Cross-checks every finding against the DGAL inspection grid, qualifies severity, predicts the grade, writes the report |
+| 4. Food safety plan | `nvidia/nemotron-3-super-120b-a12b` | Drafts the establishment's Food Safety Management Plan (PMS: hygiene practices, HACCP flow with CCPs, records, procedures) so that every finding is addressed by a practice, a control point or a priority action |
 
 Design principle: **models perceive and extract, code decides.** Temperature limits and
 verdicts are never left to a language model.
 
 The UI streams each step live (Server-Sent Events), shows which model is working, and links
-every finding to its evidence (photo thumbnail, reading, statement).
+every finding to its evidence (photo thumbnail, reading, statement). The report and the plan
+export to PDF through a print stylesheet (**Download PDF** → "Save as PDF") and to JSON.
 
 ## Run it locally
 
@@ -50,6 +52,7 @@ Put kitchen photos in a folder with an optional `temperatures.txt` and `statemen
 ```bash
 npx tsx scripts/audit.mts samples/demo        # English report
 npx tsx scripts/audit.mts samples/demo fr     # French report
+npx tsx scripts/pms.mts samples/demo          # then the food safety plan from report.json
 ```
 
 Other scripts: `scripts/models.mts` lists the Token Factory catalogue and checks the model ids
@@ -61,10 +64,11 @@ Argus uses; `scripts/probe-vision.mts` tests which models accept image input.
 src/lib/nebius.ts              Token Factory client and model ids
 src/lib/schemas.ts             zod schemas (lenient enums for model output)
 src/lib/rules/temperatures.ts  deterministic temperature compliance rules
-src/lib/pipeline/              perceive → extract → judge, and the event orchestrator
+src/lib/pipeline/              perceive → extract → judge → pms, and the event orchestrator
 src/lib/reference/             inspection reference: texts, grid, severity scale, grade rules
 src/app/api/inspect/route.ts   SSE endpoint
-src/components/                capture form, live timeline, report
+src/app/api/pms/route.ts       food safety plan endpoint
+src/components/                capture form, live timeline, report, food safety plan
 ```
 
 ## Demo case file

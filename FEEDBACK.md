@@ -32,3 +32,11 @@ what worked, what got in the way.
 - Enum values must be listed in the JSON template of the prompt, otherwise Ultra writes free
   text ("chambre froide", "24 h"); a lenient enum with aliases on the parsing side absorbs the
   rest.
+
+## 2026-09-17 — Food safety plan generation
+- **Super 120B on long structured output**: ~30 s for a 6.5k-token JSON document, no truncation
+  at `max_tokens: 14000`. It drifts from the JSON template more than Ultra does (drops fields,
+  returns `{title, detail}` objects where a string was asked). A permissive zod layer that
+  flattens objects to text absorbed everything; strict schemas would have failed one call in two.
+- Reusing the same `reasoning`-free path as Ultra: Super returns `content` directly, no
+  `reasoning` field at temperature 0.2 with this prompt.

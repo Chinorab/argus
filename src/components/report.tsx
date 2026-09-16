@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Download, RotateCcw, ChevronDown, Camera, Thermometer, MessageSquareText, FileText } from "lucide-react";
+import { Download, RotateCcw, ChevronDown, Camera, Thermometer, MessageSquareText, FileText, Printer, ShieldCheck, Loader2 } from "lucide-react";
 import type { JudgeResult } from "@/lib/pipeline/judge";
+import type { PmsResult } from "@/lib/pipeline/pms";
+import { PmsView } from "./pms";
 import type { Finding, TemperatureReading } from "@/lib/schemas";
 import type { PhotoDraft } from "./capture-form";
 import { GRADE_COLOR, GRADE_ORDER, SEVERITY_COLOR, SEVERITY_ORDER, shortModel, useLang, useT } from "@/lib/i18n";
@@ -21,10 +23,32 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
   const { lang } = useLang();
   const r = result.report;
   const counts = SEVERITY_ORDER.map((s) => [s, r.findings.filter((f) => f.severity === s).length] as const);
+  const [pms, setPms] = useState<PmsResult | null>(null);
+  const [pmsBusy, setPmsBusy] = useState(false);
+  const [pmsError, setPmsError] = useState<string | null>(null);
+
+  async function generatePms() {
+    setPmsBusy(true);
+    setPmsError(null);
+    try {
+      const res = await fetch("/api/pms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ establishment, caseText: result.caseText, report: r, lang }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setPms(body as PmsResult);
+    } catch (err) {
+      setPmsError((err as Error).message);
+    } finally {
+      setPmsBusy(false);
+    }
+  }
   const date = new Date().toLocaleDateString(lang === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
 
   function download() {
-    const blob = new Blob([JSON.stringify({ establishment, date: new Date().toISOString(), ...result }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ establishment, date: new Date().toISOString(), ...result, pms: pms?.pms }, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
     a.download = `argus-${(establishment || "inspection").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.json`;
@@ -33,7 +57,7 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
   }
 
   return (
-    <article className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 pb-24 pt-6 sm:pt-10">
+    <article className="print-root mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 pb-24 pt-6 sm:pt-10">
       {/* Header and verdict */}
       <header className="argus-rise flex flex-col gap-6">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -168,9 +192,35 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
       )}
 
       {/* Reasoning */}
-      {result.reasoning && <Reasoning text={result.reasoning} model={result.model} usage={result.usage} />}
+      {result.reasoning && (
+        <div className="print-hidden">
+          <Reasoning text={result.reasoning} model={result.model} usage={result.usage} />
+        </div>
+      )}
 
-      <footer className="flex flex-wrap gap-3">
+      {/* Food safety plan */}
+      {pms ? (
+        <PmsView result={pms} />
+      ) : (
+        <section className="print-hidden flex flex-col items-start gap-2 rounded-xl border border-dashed border-line p-5">
+          <button
+            onClick={generatePms}
+            disabled={pmsBusy}
+            className="flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-ink transition enabled:hover:opacity-90 disabled:opacity-60"
+          >
+            {pmsBusy ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
+            {pmsBusy ? t.generatingPms : t.generatePms}
+          </button>
+          {pmsError && <p className="text-sm text-n4">{pmsError}</p>}
+        </section>
+      )}
+
+      <p className="hidden text-xs text-ink-3 print-visible">{t.printedBy}</p>
+
+      <footer className="print-hidden flex flex-wrap items-center gap-3">
+        <button onClick={() => window.print()} className="flex items-center gap-2 rounded-full border border-line bg-paper-2 px-4 py-2 text-sm hover:bg-paper-3" title={t.pdfHint}>
+          <Printer size={15} /> {t.downloadPdf}
+        </button>
         <button onClick={download} className="flex items-center gap-2 rounded-full border border-line bg-paper-2 px-4 py-2 text-sm hover:bg-paper-3">
           <Download size={15} /> {t.download}
         </button>
