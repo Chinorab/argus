@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Argus — l'inspection sanitaire avant l'inspecteur
 
-## Getting Started
+Agent multimodal qui simule une inspection DDPP dans une cuisine de restauration commerciale :
+photos + notes vocales + relevés de température → note Alim'confiance prédite, rapport
+d'inspection, plan correctif, plan de maîtrise sanitaire.
 
-First, run the development server:
+Construit pour le **Nebius × NVIDIA Global AI Hackathon** (track Best Apps and Agents).
+
+## Modèles (100 % Nebius Token Factory)
+
+| Étape | Modèle |
+|---|---|
+| Perception photo / audio | `nvidia/nemotron-3-nano-omni-reasoning-30b-a3b` |
+| Extraction structurée | `nvidia/nemotron-3-nano-30b-a3b` |
+| Jugement réglementaire | `nvidia/nemotron-3-ultra-550b` (repli `nvidia/nemotron-3-super-120b-a12b`) |
+
+## Installation
 
 ```bash
+git clone https://github.com/<user>/argus && cd argus
+npm install
+cp .env.example .env.local   # renseigner NEBIUS_API_KEY
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Test du pipeline en ligne de commande
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Déposer des photos de cuisine dans `samples/demo/` (avec `temperatures.txt` et `declaratif.txt`) puis :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx tsx scripts/audit.ts samples/demo
+```
 
-## Learn More
+## Licence
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Apache 2.0 — voir [LICENSE](LICENSE).
