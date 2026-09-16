@@ -1,26 +1,99 @@
 @import "tailwindcss";
 
+/*
+ * Argus — jetons de design.
+ * Ambiance « dossier d'inspection » : papier chaud, encre, un seul accent (vert-bleu profond),
+ * plus l'échelle Alim'confiance (4 niveaux) qui est la seule couleur forte de l'interface.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --paper: #f6f4ef;
+  --paper-2: #ffffff;
+  --paper-3: #ece9e1;
+  --ink: #17191c;
+  --ink-2: #4b4f56;
+  --ink-3: #8a8f98;
+  --line: #d9d5cb;
+  --accent: #0f5c5c;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcecea;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --n1: #1f7a3a; /* très satisfaisant */
+  --n2: #7cb342; /* satisfaisant */
+  --n3: #e8a317; /* à améliorer */
+  --n4: #c62828; /* à corriger de manière urgente */
+
+  --sev-mineure: #8a8f98;
+  --sev-majeure: #e8a317;
+  --sev-critique: #c62828;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    --paper: #131416;
+    --paper-2: #1b1d20;
+    --paper-3: #222428;
+    --ink: #eceae4;
+    --ink-2: #b4b2ab;
+    --ink-3: #7d7c76;
+    --line: #2e3035;
+    --accent: #5fb3ad;
+    --accent-ink: #0b1a1a;
+    --accent-soft: #1b3231;
   }
 }
 
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-n1: var(--n1);
+  --color-n2: var(--n2);
+  --color-n3: var(--n3);
+  --color-n4: var(--n4);
+  --color-sev-mineure: var(--sev-mineure);
+  --color-sev-majeure: var(--sev-majeure);
+  --color-sev-critique: var(--sev-critique);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Pulsation discrète des étapes en cours dans la timeline. */
+@keyframes argus-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.argus-pulse {
+  animation: argus-pulse 1.4s ease-in-out infinite;
+}
+
+/* Apparition des cartes du rapport. */
+@keyframes argus-rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.argus-rise {
+  animation: argus-rise 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .argus-pulse, .argus-rise { animation: none; }
 }

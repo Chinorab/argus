@@ -34,3 +34,9 @@ npx tsx scripts/audit.mts samples/demo
 ## Licence
 
 Apache 2.0 — voir [LICENSE](LICENSE).
+
+## Dossier de démonstration
+
+Le bouton « Essayer avec le dossier de démonstration » charge trois photos de Wikimedia Commons
+(`public/demo/manifest.json` contient les attributions : Dwight Sipler CC BY 2.0, MarkBuckawicki CC0,
+Shixart1985 CC BY 2.0), des relevés de température volontairement piégés et un déclaratif sans PMS.

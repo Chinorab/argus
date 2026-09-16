@@ -98,6 +98,11 @@ Sévérité d'une non-conformité :
 - **majeure** : défaut de maîtrise pouvant conduire à un danger (relevé de température non enregistré, plan de nettoyage absent, rangement cru/cuit incorrect ponctuel, lave-mains inutilisable).
 - **critique** : danger avéré ou imminent pour le consommateur (rupture de chaîne du froid confirmée, DLC dépassées en stock, nuisibles actifs, contamination croisée généralisée, absence d'eau potable, insalubrité).
 
+Qualification imposée des non-conformités de température (B2), une par équipement, à appliquer telle quelle :
+- équipement dont au moins un relevé est marqué « DÉRIVE PERSISTANTE » (≥ 2 relevés consécutifs hors limite) → **critique** ;
+- dépassement isolé au-delà de la tolérance (> 2 °C sur froid positif, tout dépassement sur froid négatif ou chaud) → **majeure** ;
+- dépassement isolé dans la tolérance ponctuelle de 2 °C sur froid positif → **mineure**.
+
 Règles de prédiction de la note globale :
 1. ≥ 1 non-conformité **critique** non maîtrisée → **à corriger de manière urgente** (risque de fermeture : élevé ; mise en demeure ou fermeture administrative possible sur le champ).
 2. ≥ 3 non-conformités **majeures**, ou 1 majeure combinée à ≥ 5 mineures → **à améliorer** (risque : modéré ; avertissement, mise en demeure, nouvelle inspection).
