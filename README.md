@@ -28,7 +28,7 @@ npm run dev
 Déposer des photos de cuisine dans `samples/demo/` (avec `temperatures.txt` et `declaratif.txt`) puis :
 
 ```bash
-npx tsx scripts/audit.ts samples/demo
+npx tsx scripts/audit.mts samples/demo
 ```
 
 ## Licence

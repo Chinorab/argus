@@ -1,33 +1,56 @@
 import { MODELS, nebius, extractJson } from "@/lib/nebius";
-import { ReleveTemperature } from "@/lib/schemas";
+import type { ReleveTemperature } from "@/lib/schemas";
+import { qualifier, type ReleveBrut } from "@/lib/rules/temperatures";
 import { z } from "zod";
 
-const SYSTEM = `Tu normalises des relevés de température de cuisine professionnelle (France).
-Entrée : texte brut (CSV, tableau collé, notes manuscrites transcrites, phrases).
-Pour chaque relevé, détermine le type d'enceinte et applique la limite réglementaire
-(arrêté du 21 décembre 2009) :
-- froid_positif : ≤ +4 °C (≤ +3 °C pour plats cuisinés en liaison froide, ≤ +2 °C viande hachée)
-- froid_negatif : ≤ −18 °C (surgelés) ou ≤ −12 °C (congelés)
-- chaud : ≥ +63 °C
-- refroidissement : +63 → +10 °C en < 2 h
-Un relevé est non conforme si la valeur dépasse la limite. Signale les dérives persistantes
-(plusieurs relevés consécutifs hors limite sur le même équipement) dans "commentaire".
-Réponds UNIQUEMENT en JSON : {"releves": [ {equipement, type, valeur_c, horodatage?, limite_c, conforme, commentaire?} ]}`;
+/**
+ * Étape 2 — extraction des relevés par Nemotron Nano 30B.
+ * Le modèle n'émet AUCUN verdict : il transcrit (équipement, type, denrée, valeur, date).
+ * Les limites et la conformité sont calculées par `rules/temperatures.ts`.
+ */
+const SYSTEM = `Tu transcris des relevés de température de cuisine professionnelle en JSON.
+Entrée : texte brut (CSV, tableau collé, notes, phrases). Un relevé = une valeur.
+Ne calcule RIEN, ne juge RIEN : transcris chaque valeur telle quelle, dans l'ordre du texte.
 
-const Out = z.object({ releves: z.array(ReleveTemperature) });
+Pour chaque relevé :
+- "equipement" : nom tel qu'écrit (ex. "Frigo 2 (viandes)").
+- "type" : froid_positif (frigo, chambre froide, vitrine réfrigérée), froid_negatif (congélateur,
+  surgélateur), chaud (bain-marie, maintien au chaud, armoire chauffante, service chaud),
+  refroidissement (cellule, refroidissement rapide), autre.
+- "denree" : viande_hachee, viande, poisson, plat_cuisine, denree_perissable (laitier, œufs,
+  charcuterie, légumes), ou inconnue si le texte ne le dit pas.
+- "valeur_c" : nombre (négatif pour les congélateurs, ex. -18.5).
+- "horodatage" : date/heure telle qu'écrite, ou null.
 
-/** Étape 2 — extraction structurée des relevés par Nemotron Nano 30B. */
+Réponds UNIQUEMENT en JSON : {"releves": [{"equipement": "...", "type": "...", "denree": "...", "valeur_c": 0, "horodatage": null}]}`;
+
+const Brut = z.object({
+  equipement: z.string(),
+  type: z.enum(["froid_positif", "froid_negatif", "chaud", "refroidissement", "autre"]).catch("autre"),
+  denree: z
+    .enum(["viande_hachee", "viande", "poisson", "plat_cuisine", "denree_perissable", "inconnue"])
+    .nullish()
+    .catch("inconnue"),
+  valeur_c: z.coerce.number(),
+  horodatage: z.string().nullish(),
+});
+const Out = z.object({ releves: z.array(Brut) });
+
 export async function extractTemperatures(raw: string): Promise<ReleveTemperature[]> {
   if (!raw.trim()) return [];
   const res = await nebius.chat.completions.create({
     model: MODELS.fast,
     temperature: 0,
-    max_tokens: 2000,
+    max_tokens: 4000,
     messages: [
       { role: "system", content: SYSTEM },
       { role: "user", content: raw },
     ],
+    // Transcription déterministe : le mode raisonnement de Nemotron agrège les relevés, on le coupe.
+    // @ts-expect-error paramètre vLLM transmis tel quel par Token Factory
+    chat_template_kwargs: { enable_thinking: false },
   });
   const text = res.choices[0]?.message?.content ?? "";
-  return Out.parse(extractJson(text)).releves;
+  const bruts: ReleveBrut[] = Out.parse(extractJson(text)).releves;
+  return qualifier(bruts);
 }

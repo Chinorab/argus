@@ -28,7 +28,9 @@ function buildSystem(referentiel: string): string {
   return `Tu es un inspecteur sanitaire expérimenté de la DDPP, en mission d'inspection dans un
 établissement de restauration commerciale. Tu appliques STRICTEMENT le référentiel ci-dessous.
 Tu ne retiens que des non-conformités étayées par une preuve du dossier (photo, relevé,
-note vocale, déclaratif). Chaque non-conformité cite le point de la grille (ex. B3) et le
+note vocale, déclaratif). Tu ne DÉDUIS jamais une non-conformité d'une absence de preuve :
+ce qui n'a pas été observé ni déclaré va dans "points_a_verifier" (ce que tu contrôlerais
+sur place), jamais dans "non_conformites" ni dans "points_forts". Chaque non-conformité cite le point de la grille (ex. B3) et le
 texte (ex. CE 852/2004 annexe II chap. IX). Tu qualifies la sévérité selon le barème § 4 et
 tu prédis la note Alim'confiance en appliquant les règles § 4 à la lettre. Tu rédiges la
 synthèse comme dans un vrai rapport d'inspection : factuel, précis, sans jugement de valeur.
@@ -45,16 +47,17 @@ Réponds UNIQUEMENT avec un objet JSON :
   "non_conformites": [{
     "id": "NC-01",
     "titre": "court",
-    "zone": "...",
+    "zone": "reception|stockage_sec|stockage_froid|legumerie|preparation_froide|preparation_chaude|cuisson|plonge|dechets|vestiaires_sanitaires|salle|exterieur|inconnue (inconnue pour les non-conformités documentaires ou générales)",
     "severite": "mineure|majeure|critique",
     "constat": "ce qui a été observé, précis",
     "reference_reglementaire": "point de grille + texte",
     "risque": "danger pour le consommateur",
     "preuve": {"type": "photo|temperature|audio|declaratif", "ref": "identifiant de la preuve"},
     "action_corrective": "action concrète",
-    "delai": "immediat|24h|7j|30j"
+    "delai": "immediat|24h|7j|30j (valeur exacte)"
   }],
-  "points_forts": ["..."],
+  "points_forts": ["uniquement ce qui est observé ou déclaré"],
+  "points_a_verifier": ["contrôles à faire sur place, sans preuve dans le dossier"],
   "risque_fermeture": "faible|modere|eleve"
 }`;
 }
@@ -98,6 +101,9 @@ export interface JudgeResult {
   modele: string;
   dureeMs: number;
   dossierTexte: string;
+  /** Chaîne de raisonnement renvoyée par Nemotron (champ `reasoning`), pour la timeline. */
+  raisonnement?: string;
+  usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
 }
 
 /** Étape 3 — jugement réglementaire par Nemotron Ultra, repli sur Super. */
@@ -115,17 +121,19 @@ export async function judge(
     const res = await nebius.chat.completions.create({
       model: modele,
       temperature: 0.1,
-      max_tokens: 6000,
+      max_tokens: 16000,
       messages: [
         { role: "system", content: system },
         { role: "user", content: dossierTexte },
       ],
     });
-    const text = res.choices[0]?.message?.content ?? "";
-    const rapport = Rapport.parse(extractJson(text));
+    const msg = res.choices[0]?.message as { content?: string | null; reasoning?: string } | undefined;
+    if (res.choices[0]?.finish_reason === "length")
+      throw new Error(`réponse tronquée (max_tokens), ${res.usage?.completion_tokens} tokens générés`);
+    const rapport = Rapport.parse(extractJson(msg?.content ?? ""));
     const ms = Date.now() - t0;
     onEvent?.({ type: "done", modele, ms });
-    return { rapport, modele, dureeMs: ms, dossierTexte };
+    return { rapport, modele, dureeMs: ms, dossierTexte, raisonnement: msg?.reasoning, usage: res.usage };
   };
 
   try {

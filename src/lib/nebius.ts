@@ -10,14 +10,14 @@ export const nebius = new OpenAI({
 });
 
 export const MODELS = {
-  /** Nemotron 3 Nano Omni — vision + audio, perception rapide par photo. */
+  /** MiniCPM-V 4.5 — perception photo (aucun Nemotron de Token Factory n accepte d image à ce jour). */
   perception:
     process.env.ARGUS_MODEL_PERCEPTION ??
-    "nvidia/nemotron-3-nano-omni-reasoning-30b-a3b",
+    "openbmb/MiniCPM-V-4_5",
   /** Nemotron 3 Nano 30B — extraction structurée, appels rapides. */
-  fast: process.env.ARGUS_MODEL_FAST ?? "nvidia/nemotron-3-nano-30b-a3b",
+  fast: process.env.ARGUS_MODEL_FAST ?? "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
   /** Nemotron 3 Ultra 550B — jugement réglementaire lourd. */
-  judge: process.env.ARGUS_MODEL_JUDGE ?? "nvidia/nemotron-3-ultra-550b",
+  judge: process.env.ARGUS_MODEL_JUDGE ?? "nvidia/Nemotron-3-Ultra-550b-a55b",
   /** Nemotron 3 Super 120B — repli si Ultra sature. */
   judgeFallback:
     process.env.ARGUS_MODEL_JUDGE_FALLBACK ??
