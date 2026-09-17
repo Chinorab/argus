@@ -1,6 +1,6 @@
 # Video script — Argus (2:50 target, 3:00 hard limit)
 
-Language: English voice-over. Screen recording of the live demo + one real kitchen sequence
+Language: English voice-over — generated track: `docs/media/voiceover.mp3` (Microsoft Andrew neural voice via edge-tts, 2:11), subtitles `docs/media/voiceover.srt`, source text `docs/voiceover.txt`. Screen recording of the live demo + one real kitchen sequence
 shot on a phone. No music under the voice-over during the report (let the content breathe);
 a light bed elsewhere. Subtitles burned in (judges may watch muted).
 
