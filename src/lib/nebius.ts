@@ -15,8 +15,8 @@ export const nebius = new OpenAI({
 export const TIMEOUTS = {
   perception: 60_000,
   fast: 60_000,
-  judge: 150_000,
-  judgeFallback: 120_000,
+  judge: 130_000,
+  judgeFallback: 100_000,
   plan: 150_000,
 } as const;
 
