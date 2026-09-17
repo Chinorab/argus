@@ -1,4 +1,4 @@
-import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import { MODELS, TIMEOUTS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 import { Observation } from "@/lib/schemas";
 
@@ -44,21 +44,24 @@ export interface PerceiveInput {
 
 /** Step 1 — photo perception. */
 export async function perceiveImage(input: PerceiveInput): Promise<Observation> {
-  const res = await nebius.chat.completions.create({
-    model: MODELS.perception,
-    temperature: 0.2,
-    max_tokens: 1200,
-    messages: [
-      { role: "system", content: `${SYSTEM}\n${languageInstruction(input.lang)}` },
-      {
-        role: "user",
-        content: [
-          { type: "image_url", image_url: { url: input.image } },
-          { type: "text", text: input.hint ? `Operator's caption: ${input.hint}. Analyse the photo.` : "Analyse the photo." },
-        ],
-      },
-    ],
-  });
+  const res = await nebius.chat.completions.create(
+    {
+      model: MODELS.perception,
+      temperature: 0.2,
+      max_tokens: 1200,
+      messages: [
+        { role: "system", content: `${SYSTEM}\n${languageInstruction(input.lang)}` },
+        {
+          role: "user",
+          content: [
+            { type: "image_url", image_url: { url: input.image } },
+            { type: "text", text: input.hint ? `Operator's caption: ${input.hint}. Analyse the photo.` : "Analyse the photo." },
+          ],
+        },
+      ],
+    },
+    { timeout: TIMEOUTS.perception, maxRetries: 1 },
+  );
   const text = res.choices[0]?.message?.content ?? "";
   const obs = Observation.parse(extractJson(text));
   return { ...obs, anomalies: dropAbsenceClaims(obs.anomalies) };

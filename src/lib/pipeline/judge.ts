@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import { MODELS, TIMEOUTS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 import { Report, type Observation, type TemperatureReading } from "@/lib/schemas";
 import type { VoiceNote } from "./notes";
@@ -134,18 +134,21 @@ export async function judge(
   const system = buildSystem(reference, caseFile.lang);
   const caseText = buildCaseText(caseFile);
 
-  const attempt = async (model: string) => {
+  const attempt = async (model: string, timeout: number) => {
     const t0 = Date.now();
     onEvent?.({ type: "start", model });
-    const res = await nebius.chat.completions.create({
-      model,
-      temperature: 0.1,
-      max_tokens: 16000,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: caseText },
-      ],
-    });
+    const res = await nebius.chat.completions.create(
+      {
+        model,
+        temperature: 0.1,
+        max_tokens: 16000,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: caseText },
+        ],
+      },
+      { timeout, maxRetries: 0 },
+    );
     const msg = res.choices[0]?.message as { content?: string | null; reasoning?: string } | undefined;
     if (res.choices[0]?.finish_reason === "length")
       throw new Error(`reply truncated (max_tokens), ${res.usage?.completion_tokens} tokens generated`);
@@ -156,10 +159,10 @@ export async function judge(
   };
 
   try {
-    return await attempt(MODELS.judge);
+    return await attempt(MODELS.judge, TIMEOUTS.judge);
   } catch (err) {
     onEvent?.({ type: "fallback", model: MODELS.judgeFallback });
     console.warn(`[argus] ${MODELS.judge} failed (${(err as Error).message}), falling back to ${MODELS.judgeFallback}`);
-    return await attempt(MODELS.judgeFallback);
+    return await attempt(MODELS.judgeFallback, TIMEOUTS.judgeFallback);
   }
 }

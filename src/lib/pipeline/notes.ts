@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import { MODELS, TIMEOUTS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 
 /**
@@ -45,7 +45,7 @@ export async function structureVoiceNotes(transcripts: string[], lang: Lang): Pr
     ],
     // @ts-expect-error vLLM parameter passed through by Token Factory
     chat_template_kwargs: { enable_thinking: false },
-  });
+  }, { timeout: TIMEOUTS.fast, maxRetries: 1 });
   const parsed = Out.parse(extractJson(res.choices[0]?.message?.content ?? ""));
   // Keep the client-side numbering even if the model renumbers.
   return parsed.notes.map((n, i) => ({ ...n, ref: `A-${String(i + 1).padStart(2, "0")}` }));

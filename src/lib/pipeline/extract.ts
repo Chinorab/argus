@@ -1,4 +1,4 @@
-import { MODELS, nebius, extractJson } from "@/lib/nebius";
+import { MODELS, TIMEOUTS, nebius, extractJson } from "@/lib/nebius";
 import type { TemperatureReading } from "@/lib/schemas";
 import { qualify, type RawReading } from "@/lib/rules/temperatures";
 import { z } from "zod";
@@ -50,7 +50,7 @@ export async function extractTemperatures(rawText: string): Promise<TemperatureR
     // Deterministic transcription: Nemotron's reasoning mode aggregates tabular data, so we turn it off.
     // @ts-expect-error vLLM parameter passed through by Token Factory
     chat_template_kwargs: { enable_thinking: false },
-  });
+  }, { timeout: TIMEOUTS.fast, maxRetries: 1 });
   const text = res.choices[0]?.message?.content ?? "";
   const readings: RawReading[] = Out.parse(extractJson(text)).readings;
   return qualify(readings);

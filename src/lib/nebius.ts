@@ -11,6 +11,15 @@ export const nebius = new OpenAI({
   baseURL: process.env.NEBIUS_BASE_URL ?? "https://api.tokenfactory.nebius.com/v1/",
 });
 
+/** Per-call timeouts (ms). Token Factory occasionally hangs a request; a hung judge would otherwise eat the whole serverless budget. */
+export const TIMEOUTS = {
+  perception: 60_000,
+  fast: 60_000,
+  judge: 150_000,
+  judgeFallback: 120_000,
+  plan: 150_000,
+} as const;
+
 export const MODELS = {
   /** MiniCPM-V 4.5 — photo perception (no Nemotron on Token Factory accepts image input yet). */
   perception: process.env.ARGUS_MODEL_PERCEPTION ?? "openbmb/MiniCPM-V-4_5",

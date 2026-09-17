@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import { MODELS, TIMEOUTS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 import type { Report } from "@/lib/schemas";
 import { loadReference } from "./judge";
@@ -135,7 +135,7 @@ export async function generatePms(input: PmsInput): Promise<PmsResult> {
         content: `# Establishment: ${input.establishment}\n\n${input.caseText}\n\n# Simulated inspection report\n${JSON.stringify(input.report, null, 1)}`,
       },
     ],
-  });
+  }, { timeout: TIMEOUTS.plan, maxRetries: 1 });
   if (res.choices[0]?.finish_reason === "length") throw new Error(`reply truncated (max_tokens), ${res.usage?.completion_tokens} tokens generated`);
   const pms = Pms.parse(extractJson(res.choices[0]?.message?.content ?? ""));
   return { pms, model, durationMs: Date.now() - t0, usage: res.usage };
