@@ -20,8 +20,11 @@ For each reading:
   or unknown if the text does not say.
 - "value_c": number (negative for freezers, e.g. -18.5).
 - "timestamp": date/time as written, or null.
+- Cooling batches ("blast chiller, beef stew: 68 °C at 14:10 to 8 °C at 15:45") are ONE reading:
+  "kind": "cooling", "value_c" = the FINAL temperature (8), "start_c" = the starting temperature (68),
+  "duration_min" = minutes between the two times if both are given (95), else null.
 
-Reply ONLY in JSON: {"readings": [{"equipment": "...", "kind": "...", "foodstuff": "...", "value_c": 0, "timestamp": null}]}`;
+Reply ONLY in JSON: {"readings": [{"equipment": "...", "kind": "...", "foodstuff": "...", "value_c": 0, "timestamp": null, "start_c": null, "duration_min": null}]}`;
 
 const Raw = z.object({
   equipment: z.string(),
@@ -29,6 +32,8 @@ const Raw = z.object({
   foodstuff: z.enum(["minced_meat", "meat", "fish", "cooked_dish", "perishable", "unknown"]).nullish().catch("unknown"),
   value_c: z.coerce.number(),
   timestamp: z.string().nullish(),
+  start_c: z.coerce.number().nullish(),
+  duration_min: z.coerce.number().nullish(),
 });
 const Out = z.object({ readings: z.array(Raw) });
 

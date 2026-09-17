@@ -182,9 +182,13 @@ export function Report({ establishment, result, photos, observations, temperatur
                   <tr key={i} className="border-b border-line last:border-0">
                     <td className="max-w-[12rem] truncate px-3 py-1.5" title={x.equipment}>{x.equipment}</td>
                     <td className="px-3 py-1.5 text-ink-3">{x.timestamp ?? "—"}</td>
-                    <td className={`px-3 py-1.5 text-right font-mono ${x.compliant ? "" : "text-n4"}`}>{x.value_c} °C</td>
+                    <td className={`px-3 py-1.5 text-right font-mono ${x.compliant ? "" : "text-n4"}`}>
+                      {x.kind === "cooling" && x.start_c != null ? `${x.start_c} → ` : ""}
+                      {x.value_c} °C
+                      {x.kind === "cooling" && x.duration_min != null ? <span className="text-ink-3"> · {x.duration_min} min</span> : null}
+                    </td>
                     <td className="px-3 py-1.5 text-right font-mono text-ink-3">
-                      {x.kind === "hot_holding" ? "≥" : "≤"} {x.limit_c} °C
+                      {x.kind === "hot_holding" ? "≥" : "≤"} {x.limit_c} °C{x.kind === "cooling" ? " · ≤ 120 min" : ""}
                     </td>
                     <td className="px-3 py-1.5 text-xs">
                       {x.compliant ? <span className="text-n1">{t.compliant}</span> : <span className="text-n4">{x.persistent_drift ? t.persistentDrift : t.outOfRange}</span>}

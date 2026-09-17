@@ -14,8 +14,12 @@ export interface RawReading {
   equipment: string;
   kind: Kind;
   foodstuff?: Foodstuff | null;
+  /** For a cooling batch: the FINAL temperature. */
   value_c: number;
   timestamp?: string | null;
+  /** Cooling batches only. */
+  start_c?: number | null;
+  duration_min?: number | null;
 }
 
 export interface Limit {
@@ -51,6 +55,8 @@ export function limitFor(kind: Kind, foodstuff: Foodstuff = "unknown"): Limit {
 
 /** Door-opening tolerance on chilled units (reference § 2): +2 °C, isolated. */
 const CHILLED_TOLERANCE = 2;
+/** Rapid cooling: from +63 °C down to +10 °C within 2 hours. */
+const COOLING_MAX_MINUTES = 120;
 
 export function isCompliant(value: number, limit: Limit): boolean {
   return limit.direction === "max" ? value <= limit.limit_c : value >= limit.limit_c;
@@ -60,6 +66,33 @@ export function isCompliant(value: number, limit: Limit): boolean {
 export function qualify(raw: RawReading[]): TemperatureReading[] {
   const out: TemperatureReading[] = raw.map((r) => {
     const limit = limitFor(r.kind, r.foodstuff ?? "unknown");
+
+    // A cooling batch is judged on its final temperature AND the time it took.
+    if (r.kind === "cooling") {
+      const reachedTarget = r.value_c <= limit.limit_c;
+      const tooSlow = r.duration_min != null && r.duration_min > COOLING_MAX_MINUTES;
+      const compliant = reachedTarget && !tooSlow;
+      const parts: string[] = [];
+      if (r.start_c != null) parts.push(`from ${r.start_c} °C`);
+      parts.push(`to ${r.value_c} °C`);
+      if (r.duration_min != null) parts.push(`in ${r.duration_min} min`);
+      const note = compliant
+        ? `rapid cooling ${parts.join(" ")} — within +63 °C → +10 °C in 2 h`
+        : `rapid cooling ${parts.join(" ")} — ${!reachedTarget ? "target of +10 °C not reached" : ""}${!reachedTarget && tooSlow ? "; " : ""}${tooSlow ? `exceeds ${COOLING_MAX_MINUTES} min` : ""}`;
+      return {
+        equipment: r.equipment,
+        kind: r.kind,
+        value_c: r.value_c,
+        timestamp: r.timestamp ?? undefined,
+        limit_c: limit.limit_c,
+        compliant,
+        note,
+        start_c: r.start_c ?? undefined,
+        duration_min: r.duration_min ?? undefined,
+        persistent_drift: false,
+      };
+    }
+
     const compliant = isCompliant(r.value_c, limit);
     let note: string | undefined;
     if (!compliant) {
@@ -79,9 +112,10 @@ export function qualify(raw: RawReading[]): TemperatureReading[] {
     };
   });
 
-  // Persistent drift per unit, in the order given (assumed chronological).
+  // Persistent drift per unit, in the order given (assumed chronological). Cooling batches are independent events.
   const byUnit = new Map<string, TemperatureReading[]>();
   for (const r of out) {
+    if (r.kind === "cooling") continue;
     const k = r.equipment.trim().toLowerCase();
     byUnit.set(k, [...(byUnit.get(k) ?? []), r]);
   }

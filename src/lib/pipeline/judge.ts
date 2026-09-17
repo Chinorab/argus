@@ -37,6 +37,12 @@ Mandatory writing rules:
   Severity = that of the worst reading.
 - A photo anomaly with confidence < 0.6, or that looks implausible in context, goes into
   "to_verify" with the mention "to confirm on site", not into "findings".
+- Nothing that is merely absent from a photo's frame can become a finding (a hand-wash sink,
+  a thermometer or a label that is not visible is "to_verify", not a non-compliance).
+- Working clutter, open containers or tools in use during active preparation are at most
+  "minor", and only if the photo shows an actual hygiene consequence.
+- A finding whose only evidence is a photo anomaly is "major" only with confidence >= 0.7;
+  below that it is "minor" or goes to "to_verify".
 - A finding whose only evidence is a photo anomaly can be "critical" only if that anomaly has
   confidence >= 0.9 AND the description names the concrete hazard (e.g. visible pest
   droppings, food on the floor, named raw item touching a named ready-to-eat item). Otherwise
@@ -93,7 +99,9 @@ function buildCaseText(c: CaseFile): string {
   if (!c.temperatures.length) lines.push("No readings provided (lack of records to be reported, C3).");
   c.temperatures.forEach((t, i) =>
     lines.push(
-      `- T-${String(i + 1).padStart(2, "0")} ${t.equipment} (${t.kind}): ${t.value_c} °C${t.timestamp ? ` on ${t.timestamp}` : ""}, limit ${t.limit_c ?? "?"} °C → ${t.compliant ? "compliant" : "OUT OF RANGE"}${t.note ? ` — ${t.note}` : ""}`,
+      t.kind === "cooling"
+        ? `- T-${String(i + 1).padStart(2, "0")} ${t.equipment} (cooling batch): ${t.start_c != null ? `${t.start_c} °C → ` : ""}${t.value_c} °C${t.duration_min != null ? ` in ${t.duration_min} min` : ""}${t.timestamp ? ` on ${t.timestamp}` : ""} → ${t.compliant ? "compliant" : "OUT OF RANGE"}${t.note ? ` — ${t.note}` : ""}`
+        : `- T-${String(i + 1).padStart(2, "0")} ${t.equipment} (${t.kind}): ${t.value_c} °C${t.timestamp ? ` on ${t.timestamp}` : ""}, limit ${t.limit_c ?? "?"} °C → ${t.compliant ? "compliant" : "OUT OF RANGE"}${t.note ? ` — ${t.note}` : ""}`,
     ),
   );
   lines.push("\n## Operator voice notes");

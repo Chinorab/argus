@@ -46,3 +46,13 @@ what worked, what got in the way.
   fit and is announced, but absent). Argus uses the browser's Web Speech API for speech-to-text
   and Nemotron Nano 30B (thinking off) to clean transcripts and extract facts: 1.5-1.8 s for two
   notes, faithful, no hallucinated facts in a dozen runs.
+
+## 2026-09-17 — Calibrating on a clean kitchen
+- Testing a *well-run* kitchen exposed two failure modes invisible on the faulty one: the small
+  vision model reports absences ("missing hand-wash sink", 0.9) for anything outside the frame,
+  and fills its anomaly list with boilerplate ("possible cross-contamination", 0.6) when told what
+  to look for. Negative instructions in the prompt did not stop it; a deterministic filter on
+  absence claims and a judge rule ("nothing absent from a frame can become a finding") did.
+- Nano split a cooling batch ("68 °C at 14:10 to 8 °C at 15:45") into two readings; the rule
+  engine then flagged 68 °C as out of range and Ultra invented a 25-hour cooling time. Cooling
+  is now extracted as one event (start, end, duration) and judged on both temperature and time.

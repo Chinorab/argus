@@ -5,7 +5,7 @@ import { Eye, Thermometer, Scale, ShieldCheck, Camera, Mic, FileText, ArrowDown 
 import { GRADE_COLOR, GRADE_ORDER, useT } from "@/lib/i18n";
 
 /** Landing hero shown above the capture form: what Argus does, how, and what you get. */
-export function Hero({ onStart, onDemo, busy }: { onStart: () => void; onDemo: () => void; busy?: boolean }) {
+export function Hero({ onStart, onDemo, busy }: { onStart: () => void; onDemo: (caseId: "clean" | "problem") => void; busy?: boolean }) {
   const t = useT();
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col gap-14 px-4 pb-6 pt-10 sm:pt-16">
@@ -17,14 +17,21 @@ export function Hero({ onStart, onDemo, busy }: { onStart: () => void; onDemo: (
             {t.heroA} <span className="text-accent">{t.heroB}</span>
           </h1>
           <p className="max-w-xl text-lg text-ink-2">{t.heroText}</p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button onClick={onStart} className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-ink transition hover:opacity-90">
               {t.startInspection}
             </button>
-            <button onClick={onDemo} disabled={busy} className="rounded-full border border-line bg-paper-2 px-5 py-2.5 text-sm transition hover:bg-paper-3 disabled:opacity-50">
-              {t.tryDemo}
-            </button>
+            <div className="flex overflow-hidden rounded-full border border-line bg-paper-2 text-sm">
+              <button onClick={() => onDemo("clean")} disabled={busy} className="flex items-center gap-1.5 px-4 py-2.5 transition hover:bg-paper-3 disabled:opacity-50">
+                <span className="h-2 w-2 rounded-full bg-n2" /> {t.tryDemoClean}
+              </button>
+              <span className="w-px bg-line" />
+              <button onClick={() => onDemo("problem")} disabled={busy} className="flex items-center gap-1.5 px-4 py-2.5 transition hover:bg-paper-3 disabled:opacity-50">
+                <span className="h-2 w-2 rounded-full bg-n4" /> {t.tryDemoProblem}
+              </button>
+            </div>
           </div>
+          <p className="text-xs text-ink-3">{t.demoHint}</p>
           <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-3">
             <li className="flex items-center gap-1.5">
               <Camera size={13} /> {t.inputPhotos}

@@ -1,48 +1,76 @@
 {
-  "establishment": "Le Comptoir de Saint-Denis (demo)",
-  "photos": [
+  "cases": [
     {
-      "file": "walk-in-fridge.jpg",
-      "hint": {
-        "en": "walk-in fridge, vegetables",
-        "fr": "chambre froide légumes"
+      "id": "problem",
+      "establishment": "Le Comptoir de Saint-Denis (demo)",
+      "photos": [
+        {
+          "file": "walk-in-fridge.jpg",
+          "hint": { "en": "walk-in fridge, vegetables", "fr": "chambre froide légumes" },
+          "credit": "Dwight Sipler, CC BY 2.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Walk-in_cooler_(3894648278).jpg"
+        },
+        {
+          "file": "pass-station.jpg",
+          "hint": { "en": "pass and plating station", "fr": "passe et zone de dressage" },
+          "credit": "MarkBuckawicki, CC0",
+          "source": "https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg"
+        },
+        {
+          "file": "blast-chiller.jpg",
+          "hint": { "en": "blast chiller and oven", "fr": "cellule de refroidissement et four" },
+          "credit": "Shixart1985, CC BY 2.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Kitchen_equipment_seen_in_a_commercial_space_highlights_the_tools_used_for_food_preparation_and_storage_in_a_restaurant.jpg"
+        }
+      ],
+      "voiceNotes": {
+        "en": ["Fridge 2 has been at 7 degrees since Tuesday and the door does not close properly, we moved the minced meat to fridge 1 but the deliveries still go into fridge 2."],
+        "fr": ["Le frigo 2 est à 7 degrés depuis mardi et la porte ferme mal, on a déplacé la viande hachée dans le frigo 1 mais les livraisons vont toujours dans le frigo 2."]
       },
-      "credit": "Dwight Sipler, CC BY 2.0",
-      "source": "https://commons.wikimedia.org/wiki/File:Walk-in_cooler_(3894648278).jpg"
+      "temperatures": {
+        "en": "Logs from 14/09 to 16/09\nFridge 1 (dairy): 14/09 am 3.5; pm 4.0; 15/09 am 3.8; pm 4.2; 16/09 am 3.6\nFridge 2 (meat): 14/09 am 6.5; pm 7.1; 15/09 am 7.0; pm 7.4; 16/09 am 6.9\nFreezer: 14/09 -19; 15/09 -18.5; 16/09 -17\nBain-marie lunch service 15/09: 58",
+        "fr": "Relevés du 14/09 au 16/09\nFrigo 1 (produits laitiers) : 14/09 matin 3.5 ; soir 4.0 ; 15/09 matin 3.8 ; soir 4.2 ; 16/09 matin 3.6\nFrigo 2 (viandes) : 14/09 matin 6.5 ; soir 7.1 ; 15/09 matin 7.0 ; soir 7.4 ; 16/09 matin 6.9\nCongélateur : 14/09 -19 ; 15/09 -18.5 ; 16/09 -17\nBain-marie service midi 15/09 : 58"
+      },
+      "statement": {
+        "en": "Traditional restaurant, 45 seats, 3 kitchen staff. The owner completed the 14-hour hygiene training in 2019.\nNo written food safety management plan (PMS). Temperatures are logged \"when we think of it\" in a notebook.\nCleaning done every evening but no written plan. Pest-control contract in place.\nFridge 2 has been noisy for a week and its door does not close properly.",
+        "fr": "Restaurant traditionnel 45 couverts, 3 salariés en cuisine. Formation hygiène 14 h suivie par le gérant en 2019.\nPas de plan de maîtrise sanitaire écrit. Températures relevées « quand on y pense » sur un cahier.\nNettoyage chaque soir sans plan écrit. Contrat dératisation en cours.\nLe frigo 2 fait du bruit depuis une semaine et la porte ferme mal."
+      }
     },
     {
-      "file": "pass-station.jpg",
-      "hint": {
-        "en": "pass and plating station",
-        "fr": "passe et zone de dressage"
+      "id": "clean",
+      "establishment": "La Table du Port (demo)",
+      "photos": [
+        {
+          "file": "clean-cooking-line.jpg",
+          "hint": { "en": "cooking line, tilting kettles", "fr": "ligne de cuisson, sauteuses" },
+          "credit": "Larry D. Moore, CC BY 4.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Galley_1_Harmony_of_the_Seas_2026.jpg"
+        },
+        {
+          "file": "clean-prep-area.jpg",
+          "hint": { "en": "preparation area, wrapped trays", "fr": "zone de préparation, bacs filmés" },
+          "credit": "Larry D. Moore, CC BY 4.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Galley_2_Harmony_of_the_Seas_2026.jpg"
+        },
+        {
+          "file": "clean-pass.jpg",
+          "hint": { "en": "pass, plating during service", "fr": "passe, dressage en service" },
+          "credit": "Giftzwerg 88, CC BY-SA 3.0",
+          "source": "https://commons.wikimedia.org/wiki/File:Restaurantk%C3%BCche_in_Tiflis_1.jpg"
+        }
+      ],
+      "voiceNotes": {
+        "en": ["We replaced the door gasket on fridge 1 last Thursday and logged the intervention in the maintenance register."],
+        "fr": ["On a remplacé le joint de porte du frigo 1 jeudi dernier et noté l'intervention dans le registre de maintenance."]
       },
-      "credit": "MarkBuckawicki, CC0",
-      "source": "https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg"
-    },
-    {
-      "file": "blast-chiller.jpg",
-      "hint": {
-        "en": "blast chiller and oven",
-        "fr": "cellule de refroidissement et four"
+      "temperatures": {
+        "en": "Logs from 14/09 to 16/09 (twice daily, signed)\nFridge 1 (dairy): 14/09 am 2.8; pm 3.1; 15/09 am 2.9; pm 3.3; 16/09 am 2.7\nFridge 2 (meat): 14/09 am 2.1; pm 2.4; 15/09 am 2.2; pm 2.6; 16/09 am 2.0\nFreezer: 14/09 -20; 15/09 -19.5; 16/09 -20\nBain-marie lunch service 15/09: 71\nBlast chiller, beef stew 15/09: 68 °C at 14:10 to 8 °C at 15:45",
+        "fr": "Relevés du 14/09 au 16/09 (2 fois par jour, signés)\nFrigo 1 (produits laitiers) : 14/09 matin 2.8 ; soir 3.1 ; 15/09 matin 2.9 ; soir 3.3 ; 16/09 matin 2.7\nFrigo 2 (viandes) : 14/09 matin 2.1 ; soir 2.4 ; 15/09 matin 2.2 ; soir 2.6 ; 16/09 matin 2.0\nCongélateur : 14/09 -20 ; 15/09 -19.5 ; 16/09 -20\nBain-marie service midi 15/09 : 71\nCellule, bœuf bourguignon 15/09 : 68 °C à 14 h 10 → 8 °C à 15 h 45"
       },
-      "credit": "Shixart1985, CC BY 2.0",
-      "source": "https://commons.wikimedia.org/wiki/File:Kitchen_equipment_seen_in_a_commercial_space_highlights_the_tools_used_for_food_preparation_and_storage_in_a_restaurant.jpg"
+      "statement": {
+        "en": "Bistro, 60 seats, 4 kitchen staff. Written food safety management plan (PMS) updated in March 2026, HACCP flow diagrams for the 12 recipes, allergen chart at the counter.\nTemperatures logged twice daily on printed sheets and signed; cooling logged per batch. Cleaning plan posted in the dish area with product technical sheets.\nPest-control contract with quarterly visits and a bait-station map. Two staff hold the 14-hour hygiene training (2024).\nDeliveries checked at receiving (temperature and use-by), refusals recorded.",
+        "fr": "Bistrot 60 couverts, 4 salariés en cuisine. Plan de maîtrise sanitaire écrit, mis à jour en mars 2026, diagrammes HACCP pour les 12 recettes, tableau des allergènes au comptoir.\nTempératures relevées deux fois par jour sur feuilles imprimées et signées ; refroidissement enregistré par lot. Plan de nettoyage affiché en plonge avec les fiches techniques des produits.\nContrat de dératisation avec visites trimestrielles et plan des postes d'appâtage. Deux salariés ont la formation hygiène 14 h (2024).\nContrôle des livraisons à réception (température et DLC), refus consignés."
+      }
     }
-  ],
-  "temperatures": {
-    "en": "Logs from 14/09 to 16/09\nFridge 1 (dairy): 14/09 am 3.5; pm 4.0; 15/09 am 3.8; pm 4.2; 16/09 am 3.6\nFridge 2 (meat): 14/09 am 6.5; pm 7.1; 15/09 am 7.0; pm 7.4; 16/09 am 6.9\nFreezer: 14/09 -19; 15/09 -18.5; 16/09 -17\nBain-marie lunch service 15/09: 58",
-    "fr": "Relevés du 14/09 au 16/09\nFrigo 1 (produits laitiers) : 14/09 matin 3.5 ; soir 4.0 ; 15/09 matin 3.8 ; soir 4.2 ; 16/09 matin 3.6\nFrigo 2 (viandes) : 14/09 matin 6.5 ; soir 7.1 ; 15/09 matin 7.0 ; soir 7.4 ; 16/09 matin 6.9\nCongélateur : 14/09 -19 ; 15/09 -18.5 ; 16/09 -17\nBain-marie service midi 15/09 : 58"
-  },
-  "statement": {
-    "en": "Traditional restaurant, 45 seats, 3 kitchen staff. The owner completed the 14-hour hygiene training in 2019.\nNo written food safety management plan (PMS). Temperatures are logged \"when we think of it\" in a notebook.\nCleaning done every evening but no written plan. Pest-control contract in place.\nFridge 2 has been noisy for a week and its door does not close properly.",
-    "fr": "Restaurant traditionnel 45 couverts, 3 salariés en cuisine. Formation hygiène 14 h suivie par le gérant en 2019.\nPas de plan de maîtrise sanitaire écrit. Températures relevées « quand on y pense » sur un cahier.\nNettoyage chaque soir sans plan écrit. Contrat dératisation en cours.\nLe frigo 2 fait du bruit depuis une semaine et la porte ferme mal."
-  },
-  "voiceNotes": {
-    "en": [
-      "Fridge 2 has been at 7 degrees since Tuesday and the door does not close properly, we moved the minced meat to fridge 1 but the deliveries still go into fridge 2."
-    ],
-    "fr": [
-      "Le frigo 2 est à 7 degrés depuis mardi et la porte ferme mal, on a déplacé la viande hachée dans le frigo 1 mais les livraisons vont toujours dans le frigo 2."
-    ]
-  }
+  ]
 }

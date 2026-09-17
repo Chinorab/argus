@@ -74,7 +74,7 @@ export function Inspection() {
   if (phase === "capture")
     return (
       <>
-        <Hero onStart={() => form.current?.focus()} onDemo={() => form.current?.loadDemo()} />
+        <Hero onStart={() => form.current?.focus()} onDemo={(id) => form.current?.loadDemo(id)} />
         <CaptureForm ref={form} onSubmit={start} />
         <Footer />
       </>

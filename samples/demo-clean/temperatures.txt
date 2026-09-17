@@ -1,0 +1,6 @@
+Logs from 14/09 to 16/09 (twice daily, signed)
+Fridge 1 (dairy): 14/09 am 2.8; pm 3.1; 15/09 am 2.9; pm 3.3; 16/09 am 2.7
+Fridge 2 (meat): 14/09 am 2.1; pm 2.4; 15/09 am 2.2; pm 2.6; 16/09 am 2.0
+Freezer: 14/09 -20; 15/09 -19.5; 16/09 -20
+Bain-marie lunch service 15/09: 71
+Blast chiller, beef stew 15/09: 68 °C at 14:10 to 8 °C at 15:45

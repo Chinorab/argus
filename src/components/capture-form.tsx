@@ -21,13 +21,18 @@ export interface CaptureDraft {
   statement: string;
 }
 
-interface DemoManifest {
+interface DemoCase {
+  id: string;
   establishment: string;
   photos: { file: string; hint: Record<string, string> }[];
   voiceNotes?: Record<string, string[]>;
   temperatures: Record<string, string>;
   statement: Record<string, string>;
 }
+interface DemoManifest {
+  cases: DemoCase[];
+}
+export type DemoCaseId = "problem" | "clean";
 
 interface Props {
   onSubmit: (draft: CaptureDraft) => void;
@@ -36,7 +41,7 @@ interface Props {
 
 /** Actions the landing hero can trigger on the form. */
 export interface CaptureFormHandle {
-  loadDemo: () => Promise<void>;
+  loadDemo: (caseId: DemoCaseId) => Promise<void>;
   focus: () => void;
 }
 
@@ -86,11 +91,12 @@ export const CaptureForm = forwardRef<CaptureFormHandle, Props>(function Capture
     }
   }
 
-  /** Loads the bundled demo case file (Wikimedia Commons photos under free licences). */
-  async function loadDemo() {
+  /** Loads one of the bundled demo case files (Wikimedia Commons photos under free licences). */
+  async function loadDemo(caseId: DemoCaseId) {
     setLoading(true);
     try {
-      const manifest = (await fetch("/demo/manifest.json").then((r) => r.json())) as DemoManifest;
+      const all = (await fetch("/demo/manifest.json").then((r) => r.json())) as DemoManifest;
+      const manifest = all.cases.find((c) => c.id === caseId) ?? all.cases[0];
       const next: PhotoDraft[] = [];
       for (const p of manifest.photos) {
         const blob = await fetch(`/demo/${p.file}`).then((r) => r.blob());
@@ -110,9 +116,9 @@ export const CaptureForm = forwardRef<CaptureFormHandle, Props>(function Capture
   const canSubmit = photos.length > 0 && !busy && !loading;
 
   useImperativeHandle(ref, () => ({
-    loadDemo: async () => {
+    loadDemo: async (caseId) => {
       formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      await loadDemo();
+      await loadDemo(caseId);
     },
     focus: () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
   }));
@@ -130,14 +136,17 @@ export const CaptureForm = forwardRef<CaptureFormHandle, Props>(function Capture
       <header className="flex flex-col gap-2 border-t border-line pt-10">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-3">{t.newInspection}</p>
         <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.heroText}</h2>
-        <button
-          type="button"
-          onClick={loadDemo}
-          disabled={loading}
-          className="mt-1 flex w-fit items-center gap-1.5 rounded-full border border-line bg-paper-2 px-3 py-1.5 text-xs text-ink-2 transition hover:bg-paper-3 disabled:opacity-50"
-        >
-          <Sparkles size={13} className="text-accent" /> {t.tryDemo}
-        </button>
+        <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-ink-2">
+          <span className="flex items-center gap-1.5">
+            <Sparkles size={13} className="text-accent" /> {t.tryDemo}:
+          </span>
+          <button type="button" onClick={() => loadDemo("clean")} disabled={loading} className="rounded-full border border-line bg-paper-2 px-3 py-1.5 transition hover:bg-paper-3 disabled:opacity-50">
+            {t.tryDemoClean}
+          </button>
+          <button type="button" onClick={() => loadDemo("problem")} disabled={loading} className="rounded-full border border-line bg-paper-2 px-3 py-1.5 transition hover:bg-paper-3 disabled:opacity-50">
+            {t.tryDemoProblem}
+          </button>
+        </div>
       </header>
 
       <label className="flex flex-col gap-2">

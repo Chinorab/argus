@@ -78,12 +78,18 @@ src/app/api/pms/route.ts       food safety plan endpoint
 src/components/                capture form, live timeline, report, food safety plan
 ```
 
-## Demo case file
+## Demo case files
 
-The demo loads three Wikimedia Commons photos (attributions in `public/demo/manifest.json`:
-Dwight Sipler CC BY 2.0, MarkBuckawicki CC0, Shixart1985 CC BY 2.0), deliberately faulty
-temperature logs (a meat fridge drifting at 7 °C for three days, a bain-marie at 58 °C) and a
-statement with no written food safety plan.
+Two demo kitchens ship with the app so that judges can see the grade move:
+
+- **Kitchen with problems** — cardboard and raw wood in the walk-in, a meat fridge drifting at
+  7 °C for three days, a bain-marie at 58 °C, a voice note about stews cooled overnight on the
+  counter, no written food safety plan → *Urgent correction required*.
+- **Well-run kitchen** — stainless galleys, wrapped trays, twice-daily signed logs all within
+  limits, a compliant blast-chiller batch, a complete PMS → *Satisfactory* (a few minors).
+
+Photos come from Wikimedia Commons under free licences; attributions are in
+`public/demo/manifest.json`. The CLI folders `samples/demo` and `samples/demo-clean` hold the same cases.
 
 ## Security note
 

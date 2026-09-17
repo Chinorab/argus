@@ -123,6 +123,9 @@ export const TemperatureReading = z.object({
   limit_c: z.number().nullish(),
   compliant: z.boolean(),
   note: z.string().nullish(),
+  /** Cooling batches only: starting temperature and elapsed minutes to the final reading. */
+  start_c: z.number().nullish(),
+  duration_min: z.number().nullish(),
   /** Set by the rule engine when ≥ 2 consecutive readings are out of range. */
   persistent_drift: z.boolean().default(false),
 });
