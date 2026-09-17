@@ -37,7 +37,7 @@ export function Timeline({ events, photos, hasTemperatures, noteCount }: Props) 
   const now = useNow(!ended);
   const startAt = events.find((e) => e.type === "start")?.at ?? now;
 
-  const photoState = new Map<string, { status: Status; ms?: number; anomalies?: number; model?: string; message?: string }>();
+  const photoState = new Map<string, { status: Status; ms?: number; anomalies?: number; findings?: string[]; zone?: string; model?: string; message?: string }>();
   for (const p of photos) photoState.set(p.ref, { status: "pending" });
   let tempState: { status: Status; ms?: number; n?: number; bad?: number; model?: string; message?: string } = { status: hasTemperatures ? "pending" : "done", n: 0, bad: 0 };
   let judgeState: { status: Status; model?: string; ms?: number; fallback?: string; startedAt?: number; message?: string } = { status: "pending" };
@@ -49,7 +49,14 @@ export function Timeline({ events, photos, hasTemperatures, noteCount }: Props) 
         photoState.set(e.ref, { status: "running", model: e.model });
         break;
       case "photo:done":
-        photoState.set(e.ref, { status: "done", ms: e.ms, anomalies: e.observation.anomalies.length, model: photoState.get(e.ref)?.model });
+        photoState.set(e.ref, {
+          status: "done",
+          ms: e.ms,
+          anomalies: e.observation.anomalies.length,
+          findings: e.observation.anomalies.slice(0, 3).map((a) => a.finding),
+          zone: e.observation.zone,
+          model: photoState.get(e.ref)?.model,
+        });
         break;
       case "photo:error":
         photoState.set(e.ref, { status: "error", message: e.message });
@@ -104,21 +111,42 @@ export function Timeline({ events, photos, hasTemperatures, noteCount }: Props) 
 
       <ol className="relative flex flex-col gap-5 border-l border-line pl-6">
         <Step icon={<Eye size={16} />} title={t.perception} model={perceptionModel ? shortModel(perceptionModel) : undefined} status={aggregate([...photoState.values()].map((s) => s.status))}>
-          <ul className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {photos.map((p) => {
               const s = photoState.get(p.ref)!;
               return (
-                <li key={p.ref} className="flex items-center gap-2 rounded-md border border-line bg-paper-2 p-1.5 text-xs">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.dataUrl} alt="" className="h-9 w-12 flex-none rounded object-cover" />
-                  <span className="font-mono text-[10px] text-ink-3">{p.ref}</span>
-                  <span className="flex-1 truncate text-ink-2">{p.hint || p.name}</span>
-                  <StatusDot status={s.status} />
-                  <span className="w-28 flex-none whitespace-nowrap text-right tabular-nums text-ink-3">
-                    {s.status === "done" && `${t.anomalies(s.anomalies ?? 0)} · ${sec(s.ms)} s`}
-                    {s.status === "running" && t.analysing}
-                    {s.status === "error" && t.error}
-                  </span>
+                <li key={p.ref} className="overflow-hidden rounded-lg border border-line bg-paper-2 text-xs">
+                  <div className="relative aspect-[4/3]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={p.dataUrl} alt="" className={`h-full w-full object-cover transition ${s.status === "pending" ? "opacity-50 grayscale" : ""}`} />
+                    {s.status === "running" && <span className="argus-scan absolute inset-x-0 h-10" aria-hidden />}
+                    <span className="absolute left-2 top-2 rounded bg-ink/80 px-1.5 py-0.5 font-mono text-[10px] text-paper">{p.ref}</span>
+                    <span className="absolute right-2 top-2 rounded-full bg-paper-2/90 p-1">
+                      <StatusDot status={s.status} />
+                    </span>
+                    {s.status === "done" && s.zone && (
+                      <span className="absolute bottom-2 left-2 rounded bg-paper-2/90 px-1.5 py-0.5 text-[10px] text-ink-2">{t.zone[s.zone as keyof typeof t.zone] ?? s.zone}</span>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5 p-2">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="truncate text-ink-2">{p.hint || p.name}</span>
+                      <span className="flex-none whitespace-nowrap tabular-nums text-ink-3">
+                        {s.status === "done" && `${t.anomalies(s.anomalies ?? 0)} · ${sec(s.ms)} s`}
+                        {s.status === "running" && t.analysing}
+                        {s.status === "error" && t.error}
+                      </span>
+                    </div>
+                    {s.findings && s.findings.length > 0 && (
+                      <ul className="flex flex-wrap gap-1">
+                        {s.findings.map((f, i) => (
+                          <li key={i} className="argus-rise max-w-full truncate rounded-full border border-sev-major/40 bg-sev-major/10 px-2 py-0.5 text-[10px] text-ink" style={{ animationDelay: `${i * 90}ms` }} title={f}>
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </li>
               );
             })}

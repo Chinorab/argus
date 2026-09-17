@@ -85,6 +85,16 @@ body {
   animation: argus-pulse 1.4s ease-in-out infinite;
 }
 
+/* Scanning sweep over a photo while the vision model reads it. */
+@keyframes argus-scan {
+  from { top: -20%; }
+  to { top: 100%; }
+}
+.argus-scan {
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+  animation: argus-scan 1.6s linear infinite;
+}
+
 /* Report cards rising in. */
 @keyframes argus-rise {
   from { opacity: 0; transform: translateY(6px); }
@@ -95,7 +105,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .argus-pulse, .argus-rise { animation: none; }
+  .argus-pulse, .argus-rise, .argus-scan { animation: none; }
 }
 
 /* Print: the report and the plan become a clean A4 document (Download PDF = browser "Save as PDF"). */

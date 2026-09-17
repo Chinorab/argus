@@ -1,14 +1,16 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CaptureForm, type CaptureDraft } from "./capture-form";
+import { CaptureForm, type CaptureDraft, type CaptureFormHandle } from "./capture-form";
+import { Hero } from "./hero";
+import { Footer } from "./footer";
 import { Timeline } from "./timeline";
 import { Report } from "./report";
 import { inspect } from "@/lib/client/sse";
 import { useLang, useT } from "@/lib/i18n";
 import type { InspectionEvent } from "@/lib/pipeline/run";
 import type { JudgeResult } from "@/lib/pipeline/judge";
-import type { TemperatureReading } from "@/lib/schemas";
+import type { Observation, TemperatureReading } from "@/lib/schemas";
 
 type Phase = "capture" | "running" | "report";
 
@@ -21,15 +23,18 @@ export function Inspection() {
   const [events, setEvents] = useState<InspectionEvent[]>([]);
   const [result, setResult] = useState<JudgeResult | null>(null);
   const [temperatures, setTemperatures] = useState<TemperatureReading[]>([]);
+  const [observations, setObservations] = useState<Record<string, Observation>>({});
   const [totalMs, setTotalMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const abort = useRef<AbortController | null>(null);
+  const form = useRef<CaptureFormHandle>(null);
 
   async function start(d: CaptureDraft) {
     setDraft(d);
     setEvents([]);
     setResult(null);
     setError(null);
+    setObservations({});
     setPhase("running");
     abort.current?.abort();
     abort.current = new AbortController();
@@ -46,6 +51,7 @@ export function Inspection() {
         abort.current.signal,
       )) {
         setEvents((list) => [...list, e]);
+        if (e.type === "photo:done") setObservations((o) => ({ ...o, [e.ref]: e.observation }));
         if (e.type === "temperatures:done") setTemperatures(e.readings);
         if (e.type === "judge:done") setResult(e.result);
         if (e.type === "error") setError(e.message);
@@ -65,10 +71,22 @@ export function Inspection() {
     setError(null);
   }
 
-  if (phase === "capture") return <CaptureForm onSubmit={start} />;
+  if (phase === "capture")
+    return (
+      <>
+        <Hero onStart={() => form.current?.focus()} onDemo={() => form.current?.loadDemo()} />
+        <CaptureForm ref={form} onSubmit={start} />
+        <Footer />
+      </>
+    );
 
   if (phase === "report" && result && draft)
-    return <Report establishment={draft.establishment} result={result} photos={draft.photos} temperatures={temperatures} totalMs={totalMs} onReset={reset} />;
+    return (
+      <>
+        <Report establishment={draft.establishment} result={result} photos={draft.photos} observations={observations} temperatures={temperatures} totalMs={totalMs} onReset={reset} />
+        <Footer />
+      </>
+    );
 
   return (
     <>

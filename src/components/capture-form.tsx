@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";
 import { Camera, ImagePlus, X, Thermometer, FileText, ArrowRight, Loader2, Sparkles, Mic, Square, MessageSquareText, Plus } from "lucide-react";
 import { compressImage } from "@/lib/client/images";
 import { useSpeech } from "@/lib/client/speech";
@@ -34,10 +34,17 @@ interface Props {
   busy?: boolean;
 }
 
+/** Actions the landing hero can trigger on the form. */
+export interface CaptureFormHandle {
+  loadDemo: () => Promise<void>;
+  focus: () => void;
+}
+
 const MAX_PHOTOS = 12;
 
-export function CaptureForm({ onSubmit, busy }: Props) {
+export const CaptureForm = forwardRef<CaptureFormHandle, Props>(function CaptureForm({ onSubmit, busy }, ref) {
   const t = useT();
+  const formRef = useRef<HTMLFormElement>(null);
   const { lang } = useLang();
   const [establishment, setEstablishment] = useState("");
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
@@ -102,20 +109,27 @@ export function CaptureForm({ onSubmit, busy }: Props) {
 
   const canSubmit = photos.length > 0 && !busy && !loading;
 
+  useImperativeHandle(ref, () => ({
+    loadDemo: async () => {
+      formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      await loadDemo();
+    },
+    focus: () => formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+  }));
+
   return (
     <form
-      className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 pb-32 pt-6 sm:pt-10"
+      id="inspect"
+      ref={formRef}
+      className="mx-auto flex w-full max-w-3xl scroll-mt-4 flex-col gap-8 px-4 pb-16 pt-10 sm:pt-14"
       onSubmit={(e) => {
         e.preventDefault();
         if (canSubmit) onSubmit({ establishment, photos, voiceNotes, temperatures, statement });
       }}
     >
-      <header className="flex flex-col gap-2">
+      <header className="flex flex-col gap-2 border-t border-line pt-10">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-3">{t.newInspection}</p>
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          {t.heroA} <span className="text-accent">{t.heroB}</span>
-        </h1>
-        <p className="max-w-xl text-ink-2">{t.heroText}</p>
+        <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{t.heroText}</h2>
         <button
           type="button"
           onClick={loadDemo}
@@ -303,7 +317,8 @@ export function CaptureForm({ onSubmit, busy }: Props) {
         />
       </section>
 
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-paper/90 backdrop-blur">
+      {/* The action bar sticks to the bottom only once there is something to inspect. */}
+      <div className={photos.length > 0 ? "fixed inset-x-0 bottom-0 z-10 border-t border-line bg-paper/90 backdrop-blur" : ""}>
         <div className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 py-3">
           <p className="text-xs text-ink-3">{photos.length === 0 ? t.addAtLeastOne : t.photoCount(photos.length)}</p>
           <button
@@ -317,4 +332,4 @@ export function CaptureForm({ onSubmit, busy }: Props) {
       </div>
     </form>
   );
-}
+});

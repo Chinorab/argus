@@ -5,7 +5,9 @@ import { Download, RotateCcw, ChevronDown, Camera, Thermometer, MessageSquareTex
 import type { JudgeResult } from "@/lib/pipeline/judge";
 import type { PmsResult } from "@/lib/pipeline/pms";
 import { PmsView } from "./pms";
-import type { Finding, TemperatureReading } from "@/lib/schemas";
+import { ZoneMap } from "./zone-map";
+import { EvidenceGallery } from "./evidence";
+import type { Finding, Observation, TemperatureReading } from "@/lib/schemas";
 import type { PhotoDraft } from "./capture-form";
 import { GRADE_COLOR, GRADE_ORDER, SEVERITY_COLOR, SEVERITY_ORDER, shortModel, useLang, useT } from "@/lib/i18n";
 
@@ -13,12 +15,13 @@ interface Props {
   establishment: string;
   result: JudgeResult;
   photos: PhotoDraft[];
+  observations: Record<string, Observation>;
   temperatures: TemperatureReading[];
   totalMs: number;
   onReset: () => void;
 }
 
-export function Report({ establishment, result, photos, temperatures, totalMs, onReset }: Props) {
+export function Report({ establishment, result, photos, observations, temperatures, totalMs, onReset }: Props) {
   const t = useT();
   const { lang } = useLang();
   const r = result.report;
@@ -106,6 +109,9 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
         <h2 className="text-sm font-medium uppercase tracking-wider text-ink-3">{t.summary}</h2>
         <p className="whitespace-pre-line border-l-2 border-accent pl-4 text-[15px] leading-relaxed">{r.inspector_summary}</p>
       </section>
+
+      <ZoneMap findings={r.findings} />
+      <EvidenceGallery photos={photos} observations={observations} findings={r.findings} />
 
       {/* Findings */}
       {SEVERITY_ORDER.map((sev) => {
@@ -231,6 +237,8 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
     </article>
   );
 }
+
+
 
 function FindingCard({ finding: f, photos }: { finding: Finding; photos: PhotoDraft[] }) {
   const t = useT();
