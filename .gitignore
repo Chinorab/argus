@@ -49,3 +49,4 @@ samples/**/*.webp
 samples/**/report.json
 samples/**/pms.json
 docs/media/*.mp3
+docs/media/cards/*.html

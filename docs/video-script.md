@@ -26,12 +26,15 @@ when the report lands.
 | 2:34–2:48 | Screen: architecture still: Photos → MiniCPM-V · Voice → Web Speech → Nemotron Nano · Logs → Nano → rule engine · Judge → Nemotron Ultra · Plan → Nemotron Super · all on Nebius Token Factory. Then the GitHub page with the Apache 2.0 badge. | "Models perceive and extract; code decides. Four Nemotron calls, one rule engine, one reference written from the real inspection grid. Open source, Apache 2.0, live today." |
 | 2:48–2:54 | Title card: **Argus** · argus-eight-xi.vercel.app · github.com/Chinorab/argus | "Argus. See your kitchen the way the inspector will — before it matters." |
 
-## Assets to prepare
+## Assets (ready in `docs/media/cards/`, 1920×1080 PNG)
 
-- Opening split-screen: the six demo photos are in `public/demo/` (three `clean-*.jpg`, three others).
-- Architecture still (one slide, dark background, the five arrows above).
-- Two title cards (opening and closing) — same teal and paper tones as the app.
-- Screen recordings: one run of each demo kitchen, plus the PMS generation and the print preview.
+- `01-title.png` — opening card (0:00).
+- `02a-photos-two-kitchens.png` — split screen without verdicts (0:00–0:14), then
+  `02b-verdicts-two-kitchens.png` — same with the green/red badges (0:14–0:26): a straight cut between the two makes the badges "appear".
+- `03-architecture.png` — architecture still (2:34).
+- `04-closing.png` — closing card (2:48).
+- Regenerate after any change with `python docs/media/cards/build.py` (needs Chrome).
+- Still to record: one screen run of each demo kitchen, the PMS generation and the print preview.
 
 ## Timing check
 
