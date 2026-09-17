@@ -18,9 +18,9 @@ Best Apps and Agents
 
 ## Links
 
-- Live demo: https://argus-eight-xi.vercel.app — click *Try with the demo case file*, then *Run the inspection* (about 40 s).
+- Live demo: https://argus-eight-xi.vercel.app — pick *Well-run kitchen* or *Kitchen with problems*, then *Run the inspection* (about 40 s).
 - Repository (Apache 2.0): https://github.com/Chinorab/argus
-- Video: *(YouTube link)*
+- Video (2:29): https://youtu.be/m00JIPu9RjE
 
 ## Built with (tags)
 
