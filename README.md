@@ -7,6 +7,8 @@ establishment would receive, and lists the corrective actions with deadlines.
 
 Built for the **Nebius × NVIDIA Global AI Hackathon** (track: Best Apps and Agents).
 
+**Live demo:** https://argus-eight-xi.vercel.app — click *Try with the demo case file*, then *Run the inspection* (about 40 s).
+
 ## Why
 
 In France, restaurant inspection results are public. A single "urgent correction required"
