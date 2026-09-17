@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { MODELS, nebius, extractJson, languageInstruction, type Lang } from "@/lib/nebius";
+import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import type { Lang } from "@/lib/lang";
 import { Report, type Observation, type TemperatureReading } from "@/lib/schemas";
 import type { VoiceNote } from "./perceive";
 

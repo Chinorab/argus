@@ -1,4 +1,5 @@
-import { MODELS, type Lang } from "@/lib/nebius";
+import { MODELS } from "@/lib/nebius";
+import type { Lang } from "@/lib/lang";
 import type { Observation, TemperatureReading } from "@/lib/schemas";
 import { perceiveImage, perceiveAudio, type VoiceNote } from "./perceive";
 import { extractTemperatures } from "./extract";

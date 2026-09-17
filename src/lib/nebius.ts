@@ -1,4 +1,6 @@
+import "server-only"; // build-time guard: this module (and the API key) can never reach the browser bundle
 import OpenAI from "openai";
+import type { Lang } from "@/lib/lang";
 
 /**
  * Single client for Nebius Token Factory (OpenAI-compatible API).
@@ -31,8 +33,7 @@ export function extractJson<T = unknown>(text: string): T {
   return JSON.parse(candidate.slice(start, end + 1)) as T;
 }
 
-/** Output language requested from the models. */
-export type Lang = "en" | "fr";
+export type { Lang };
 
 export function languageInstruction(lang: Lang): string {
   return lang === "fr"

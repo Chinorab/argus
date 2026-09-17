@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Lang } from "@/lib/nebius";
+import type { Lang } from "@/lib/lang";
 import type { Grade, Severity, Zone } from "@/lib/schemas";
 
 export type { Lang };

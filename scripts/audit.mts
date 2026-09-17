@@ -1,6 +1,6 @@
 /**
  * Argus pipeline CLI.
- *   npx tsx scripts/audit.mts samples/demo [en|fr]
+ *   npm run audit -- samples/demo [en|fr]
  * The folder holds .jpg/.png photos, an optional temperatures.txt and statement.txt.
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";

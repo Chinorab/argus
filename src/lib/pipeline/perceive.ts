@@ -1,4 +1,5 @@
-import { MODELS, nebius, extractJson, languageInstruction, type Lang } from "@/lib/nebius";
+import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import type { Lang } from "@/lib/lang";
 import { Observation } from "@/lib/schemas";
 
 const SYSTEM = `You are a food-safety inspector (French DDPP) specialised in commercial restaurants.

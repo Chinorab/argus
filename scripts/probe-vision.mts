@@ -1,5 +1,5 @@
 // Probes which catalogue models accept image input.
-//   npx tsx scripts/probe-vision.mts samples/demo/pass-station.jpg nvidia/... openbmb/...
+//   npm run probe-vision -- samples/demo/pass-station.jpg nvidia/... openbmb/...
 import { config } from "dotenv";
 import { readFile } from "node:fs/promises";
 config({ path: ".env.local" });

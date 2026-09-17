@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "audit": "tsx --conditions=react-server scripts/audit.mts",
+    "pms": "tsx --conditions=react-server scripts/pms.mts",
+    "models": "tsx --conditions=react-server scripts/models.mts",
+    "probe-vision": "tsx --conditions=react-server scripts/probe-vision.mts"
   },
   "dependencies": {
     "dotenv": "^17.4.2",
@@ -15,6 +19,7 @@
     "openai": "^7.16.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "server-only": "^0.0.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {

@@ -50,13 +50,13 @@ Open http://localhost:3000 and click **"Try with the demo case file"**.
 Put kitchen photos in a folder with an optional `temperatures.txt` and `statement.txt`, then:
 
 ```bash
-npx tsx scripts/audit.mts samples/demo        # English report
-npx tsx scripts/audit.mts samples/demo fr     # French report
-npx tsx scripts/pms.mts samples/demo          # then the food safety plan from report.json
+npm run audit -- samples/demo        # English report
+npm run audit -- samples/demo fr     # French report
+npm run pms -- samples/demo          # then the food safety plan from report.json
 ```
 
-Other scripts: `scripts/models.mts` lists the Token Factory catalogue and checks the model ids
-Argus uses; `scripts/probe-vision.mts` tests which models accept image input.
+Other scripts: `npm run models` lists the Token Factory catalogue and checks the model ids
+Argus uses; `npm run probe-vision -- <photo> <model ids…>` tests which models accept image input.
 
 ## Project layout
 
@@ -77,6 +77,13 @@ The demo loads three Wikimedia Commons photos (attributions in `public/demo/mani
 Dwight Sipler CC BY 2.0, MarkBuckawicki CC0, Shixart1985 CC BY 2.0), deliberately faulty
 temperature logs (a meat fridge drifting at 7 °C for three days, a bain-marie at 58 °C) and a
 statement with no written food safety plan.
+
+## Security note
+
+The Nebius API key lives only in `.env.local` (git-ignored) and is read exclusively by server
+code: the Token Factory client is marked `server-only`, so the build fails if any client
+component ever imports it. Photos are sent to the server as data URLs, forwarded to the model
+and never stored.
 
 ## Language
 

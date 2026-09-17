@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { MODELS, nebius, extractJson, languageInstruction, type Lang } from "@/lib/nebius";
+import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
+import type { Lang } from "@/lib/lang";
 import type { Report } from "@/lib/schemas";
 import { loadReference } from "./judge";
 

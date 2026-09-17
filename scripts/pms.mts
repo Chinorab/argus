@@ -1,5 +1,5 @@
 // Generates the Food Safety Management Plan from a report.json produced by scripts/audit.mts.
-//   npx tsx scripts/pms.mts samples/demo [en|fr]
+//   npm run pms -- samples/demo [en|fr]
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "dotenv";
