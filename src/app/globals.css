@@ -57,9 +57,9 @@
   --color-n2: var(--n2);
   --color-n3: var(--n3);
   --color-n4: var(--n4);
-  --color-sev-mineure: var(--sev-minor);
-  --color-sev-majeure: var(--sev-major);
-  --color-sev-critique: var(--sev-critical);
+  --color-sev-minor: var(--sev-minor);
+  --color-sev-major: var(--sev-major);
+  --color-sev-critical: var(--sev-critical);
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
