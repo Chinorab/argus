@@ -91,6 +91,16 @@ Two demo kitchens ship with the app so that judges can see the grade move:
 Photos come from Wikimedia Commons under free licences; attributions are in
 `public/demo/manifest.json`. The CLI folders `samples/demo` and `samples/demo-clean` hold the same cases.
 
+## Deploy on Nebius AI Cloud
+
+The public demo runs on Vercel for convenience; the same image runs on a small CPU virtual
+machine on Nebius AI Cloud with Docker Compose (app + Caddy). Step-by-step guide in
+[deploy/README.md](deploy/README.md):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Chinorab/argus/main/deploy/setup-vm.sh | bash
+```
+
 ## Security note
 
 The Nebius API key lives only in `.env.local` (git-ignored) and is read exclusively by server

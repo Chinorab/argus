@@ -1,0 +1,12 @@
+# DOMAIN is ":80" (plain HTTP on the public IP) or a hostname (automatic HTTPS via Let's Encrypt).
+{$DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000 {
+		# Inspections stream for up to ~5 minutes over SSE.
+		flush_interval -1
+		transport http {
+			read_timeout 600s
+			write_timeout 600s
+		}
+	}
+}
