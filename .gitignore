@@ -48,3 +48,4 @@ samples/**/*.png
 samples/**/*.webp
 samples/**/report.json
 samples/**/pms.json
+docs/media/*.mp3
