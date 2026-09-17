@@ -56,3 +56,18 @@ what worked, what got in the way.
 - Nano split a cooling batch ("68 °C at 14:10 to 8 °C at 15:45") into two readings; the rule
   engine then flagged 68 °C as out of range and Ultra invented a 25-hour cooling time. Cooling
   is now extracted as one event (start, end, duration) and judged on both temperature and time.
+
+## 2026-09-17 — Latency and a hung request
+- **Ultra 550B latency varies a lot across the day**: 20-45 s for the same judgement prompt in
+  the morning, 70-96 s in the evening. Nothing in the response says whether the model was queued
+  or generating; a queue-time header would help size timeouts.
+- **One request never returned.** A judgement call to Ultra hung for more than ten minutes with
+  no error and no data. The OpenAI SDK default (10 min, 2 retries) would have turned that into a
+  30-minute wait; on Vercel the function would simply have been killed at 300 s. Argus now sets
+  per-call timeouts (perception 60 s, Nano 60 s, Ultra 150 s, Super 120 s, plan 150 s) and falls
+  back from Ultra to Super on timeout, which the UI shows as a step in the timeline. Suggestion:
+  document expected p95 latencies per model so builders can set timeouts with confidence.
+- **Stability of structured judgements.** With a fixed-severity table in the reference, the
+  predicted grade was identical across 5 consecutive runs per case (2 kitchens); the count of
+  minor findings still varies with the vision model's output at temperature 0.2. Grade stability
+  comes from the rule engine and the reference, not from the sampler.
