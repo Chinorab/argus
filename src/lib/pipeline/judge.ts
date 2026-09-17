@@ -38,9 +38,10 @@ Mandatory writing rules:
 - A photo anomaly with confidence < 0.6, or that looks implausible in context, goes into
   "to_verify" with the mention "to confirm on site", not into "findings".
 - A finding whose only evidence is a photo anomaly can be "critical" only if that anomaly has
-  confidence >= 0.8 AND the hazard is unambiguous in the description (e.g. visible pest
-  droppings, food on the floor). Otherwise cap it at "major" and add "to confirm on site" to
-  the observation. Temperature readings and operator statements are not subject to this cap.
+  confidence >= 0.9 AND the description names the concrete hazard (e.g. visible pest
+  droppings, food on the floor, named raw item touching a named ready-to-eat item). Otherwise
+  cap it at "major" and add "to confirm on site" to the observation. Temperature readings and
+  operator statements are not subject to this cap.
 - 12 findings maximum; merge what belongs to the same grid point.
 - Each finding cites the grid point (e.g. B3) and the text (e.g. EC 852/2004 Annex II ch. IX).
 - Qualify severity with the § 4 scale and predict the Alim'confiance grade by applying the § 4

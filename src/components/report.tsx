@@ -161,7 +161,7 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
         <section className="argus-rise flex flex-col gap-2" style={{ animationDelay: "220ms" }}>
           <h2 className="text-sm font-medium uppercase tracking-wider text-ink-3">{t.readings}</h2>
           <div className="overflow-x-auto rounded-lg border border-line bg-paper-2">
-            <table className="w-full text-sm">
+            <table className="w-full whitespace-nowrap text-sm">
               <thead className="text-left text-xs uppercase tracking-wider text-ink-3">
                 <tr className="border-b border-line">
                   <th className="px-3 py-2 font-medium">{t.equipment}</th>
@@ -174,7 +174,7 @@ export function Report({ establishment, result, photos, temperatures, totalMs, o
               <tbody className="tabular-nums">
                 {temperatures.map((x, i) => (
                   <tr key={i} className="border-b border-line last:border-0">
-                    <td className="px-3 py-1.5">{x.equipment}</td>
+                    <td className="max-w-[12rem] truncate px-3 py-1.5" title={x.equipment}>{x.equipment}</td>
                     <td className="px-3 py-1.5 text-ink-3">{x.timestamp ?? "—"}</td>
                     <td className={`px-3 py-1.5 text-right font-mono ${x.compliant ? "" : "text-n4"}`}>{x.value_c} °C</td>
                     <td className="px-3 py-1.5 text-right font-mono text-ink-3">

@@ -137,9 +137,9 @@ export function CaptureForm({ onSubmit, busy }: Props) {
       </label>
 
       <section className="flex flex-col gap-3">
-        <div className="flex items-baseline justify-between gap-3">
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
           <h2 className="text-sm font-medium">{t.photos}</h2>
-          <span className="text-right text-xs text-ink-3">
+          <span className="text-xs text-ink-3 sm:text-right">
             {photos.length}/{MAX_PHOTOS} · {t.photosHint}
           </span>
         </div>
@@ -154,7 +154,7 @@ export function CaptureForm({ onSubmit, busy }: Props) {
                 type="button"
                 aria-label={t.removePhoto}
                 onClick={() => setPhotos((list) => renumber(list.filter((_, j) => j !== i)))}
-                className="absolute right-2 top-2 rounded-full bg-ink/80 p-1 text-paper opacity-0 transition group-hover:opacity-100 focus:opacity-100"
+                className="absolute right-2 top-2 rounded-full bg-ink/80 p-1 text-paper transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
               >
                 <X size={14} />
               </button>

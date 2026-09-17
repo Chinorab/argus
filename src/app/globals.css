@@ -100,7 +100,9 @@ body {
 
 /* Print: the report and the plan become a clean A4 document (Download PDF = browser "Save as PDF"). */
 @media print {
-  :root {
+  /* Same specificity as the dark-mode selector so print always wins, whatever the OS theme. */
+  :root,
+  :root:not([data-theme="light"]) {
     --paper: #ffffff;
     --paper-2: #ffffff;
     --paper-3: #f3f1ec;

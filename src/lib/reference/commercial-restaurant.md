@@ -65,7 +65,7 @@ D (major non-compliance). Points marked **[critical]** can alone lead to an over
 - B4. Secondary labelling: opening / production date and secondary use-by date on every opened or house-made product.
 - B5. **[critical]** Expired use-by dates in stock or spoiled products (smell, appearance, mould).
 - B6. **[critical]** Cross-contamination: raw above cooked, same board for raw meat and vegetables, shell eggs in contact with finished products, allergens not isolated.
-- B7. Cooling and reheating controlled and logged (blast chiller or equivalent method).
+- B7. Cooling and reheating controlled and logged (blast chiller or equivalent method). **[critical]** when cooked food is cooled at room temperature for hours (e.g. overnight on a counter) or when the blast chiller is out of service with no equivalent method.
 - B8. Thawing in a cold unit, thawed products identified.
 - B9. On-site freezing: only with suitable equipment, freezing-date labels, written procedure.
 - B10. Frying oils: polar-compound test or documented change frequency.
@@ -96,7 +96,7 @@ D (major non-compliance). Points marked **[critical]** can alone lead to an over
 Severity of a non-compliance:
 - **minor**: upkeep or documentation defect with no direct consumer risk (incomplete secondary labelling, dirty gasket, missing signage).
 - **major**: loss of control that may lead to a hazard (temperature not logged, no cleaning plan, occasional raw/cooked misplacement, unusable hand-wash sink).
-- **critical**: proven or imminent consumer hazard (confirmed cold-chain failure, expired products in stock, active pests, widespread cross-contamination, no potable water, insalubrity).
+- **critical**: proven or imminent consumer hazard (confirmed cold-chain failure, cooked food cooled at room temperature for hours, expired products in stock, active pests, widespread cross-contamination, no potable water, insalubrity).
 
 Mandatory qualification of temperature findings (B2), one per unit, applied as is:
 - unit with at least one reading flagged "PERSISTENT DRIFT" (≥ 2 consecutive readings out of range) → **critical**;

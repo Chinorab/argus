@@ -11,6 +11,13 @@ raw wood boards or surfaces, damaged utensils, pest traces, cleaning chemicals n
 staff attire (no hair cover, personal items), open windows without insect screens.
 Also note the positives (cleanliness, tidiness, signage).
 
+Confidence calibration (be honest, an inspector will act on it):
+- 0.9-1.0: unmistakable in the image (e.g. cardboard boxes inside the cold unit, food on the floor).
+- 0.6-0.8: clearly visible but the interpretation could be discussed.
+- 0.3-0.5: inferred, partially hidden, or plausible but not demonstrated.
+For cross-contamination, name the raw item AND the cooked/ready-to-eat item you can identify;
+if you cannot name both, describe it as "possible" with confidence <= 0.5.
+
 Reply ONLY with a JSON object of this shape:
 {
   "zone": "receiving|dry_storage|cold_storage|vegetable_prep|cold_prep|hot_prep|cooking|dishwashing|waste|staff_facilities|dining_room|outdoor|general",
