@@ -11,162 +11,178 @@ The worst one can close you for weeks.
 Most owners find out what's wrong the day the inspector walks in.
 
 4
-00:00:10,143 --> 00:00:13,372
-A pre-inspection audit costs a few hundred euros.
+00:00:10,143 --> 00:00:15,807
+A pre-inspection audit costs a few hundred euros, so the businesses that need it most never call.
 
 5
-00:00:13,372 --> 00:00:15,833
-The businesses that need it most never call.
-
-6
-00:00:15,833 --> 00:00:17,252
+00:00:15,807 --> 00:00:17,226
 Argus is that audit.
 
-7
-00:00:17,252 --> 00:00:19,140
+6
+00:00:17,226 --> 00:00:19,114
 From a phone, in a minute.
 
-8
-00:00:19,140 --> 00:00:23,281
+7
+00:00:19,114 --> 00:00:23,255
 Built on NVIDIA Nemotron, running on Nebius Token Factory.
 
-9
-00:00:23,281 --> 00:00:24,895
+8
+00:00:23,255 --> 00:00:24,869
 You photograph the kitchen.
 
-10
-00:00:24,895 --> 00:00:28,697
-Fridges, surfaces, the dish area, the floor.
-
-11
-00:00:28,697 --> 00:00:30,520
+9
+00:00:24,869 --> 00:00:26,692
 You say what photos can't show.
 
-12
-00:00:30,520 --> 00:00:32,695
+10
+00:00:26,692 --> 00:00:32,539
+Here, a voice note: the blast chiller is broken, the stews cool on the counter overnight.
+
+11
+00:00:32,539 --> 00:00:34,713
 You paste your temperature log as it is.
 
-13
-00:00:32,695 --> 00:00:35,703
+12
+00:00:34,713 --> 00:00:37,721
 A notebook, a spreadsheet, a text message.
 
-14
-00:00:35,703 --> 00:00:37,552
+13
+00:00:37,721 --> 00:00:39,570
 And you describe your situation.
 
-15
-00:00:37,552 --> 00:00:39,218
+14
+00:00:39,570 --> 00:00:41,236
 Now watch the agent work.
 
-16
-00:00:39,218 --> 00:00:44,335
+15
+00:00:41,236 --> 00:00:46,354
 A vision model reads each photo like an inspector would, with a confidence score.
 
-17
-00:00:44,335 --> 00:00:49,388
+16
+00:00:46,354 --> 00:00:51,406
 Nemotron Nano turns your voice note into facts and transcribes the logbook.
 
-18
-00:00:49,388 --> 00:00:56,549
+17
+00:00:51,406 --> 00:00:58,567
 Then a rule engine, not a model, applies the legal limits and spots the fridge that's been drifting for three days.
 
-19
-00:00:56,549 --> 00:01:05,494
+18
+00:00:58,567 --> 00:01:07,513
 Finally, Nemotron Ultra, five hundred and fifty billion parameters, cross-checks every piece of evidence against the official inspection grid.
 
-20
-00:01:05,494 --> 00:01:07,005
-Thirty-eight seconds.
+19
+00:01:07,513 --> 00:01:09,114
+Thirty-five seconds.
 
-21
-00:01:07,005 --> 00:01:09,466
+20
+00:01:09,114 --> 00:01:11,575
 Here's the grade the inspector would publish.
 
-22
-00:01:09,466 --> 00:01:11,354
+21
+00:01:11,575 --> 00:01:13,463
 And the rule that leads to it.
 
-23
-00:01:11,354 --> 00:01:16,692
+22
+00:01:13,463 --> 00:01:18,802
 Every finding cites the grid point, the regulation, the proof, and the deadline.
 
-24
-00:01:16,692 --> 00:01:18,385
+23
+00:01:18,802 --> 00:01:20,494
 The stews cooled overnight?
 
-25
-00:01:18,385 --> 00:01:19,231
+24
+00:01:20,494 --> 00:01:21,341
 Critical.
 
-26
-00:01:19,231 --> 00:01:20,468
+25
+00:01:21,341 --> 00:01:22,578
 Point B seven.
 
-27
-00:01:20,468 --> 00:01:21,731
+26
+00:01:22,578 --> 00:01:23,841
 Immediate action.
 
-28
-00:01:21,731 --> 00:01:23,541
+27
+00:01:23,841 --> 00:01:25,651
 No photo could have shown that.
 
-29
-00:01:23,541 --> 00:01:26,015
+28
+00:01:25,651 --> 00:01:28,125
 The kitchen map tells you where it hurts.
 
-30
-00:01:26,015 --> 00:01:30,651
+29
+00:01:28,125 --> 00:01:32,760
 The evidence gallery shows exactly what the model saw, and how sure it was.
 
-31
-00:01:30,651 --> 00:01:33,697
+30
+00:01:32,760 --> 00:01:35,807
 What it couldn't see goes to "to verify on site".
 
-32
-00:01:33,697 --> 00:01:35,742
+31
+00:01:35,807 --> 00:01:37,851
 No finding without evidence.
 
-33
-00:01:35,742 --> 00:01:39,622
+32
+00:01:37,851 --> 00:01:41,731
 One more click, and Nemotron Super writes your food safety plan.
 
-34
-00:01:39,622 --> 00:01:42,708
+33
+00:01:41,731 --> 00:01:44,817
 The document the law requires, for this kitchen.
 
-35
-00:01:42,708 --> 00:01:51,770
+34
+00:01:44,817 --> 00:01:53,880
 Hygiene practices, HACCP control points, records, and a thirty-day action plan where every action points back to the finding it fixes.
 
-36
-00:01:51,770 --> 00:01:53,658
+35
+00:01:53,880 --> 00:01:55,768
 Export it as a PDF.
 
+36
+00:01:55,768 --> 00:01:58,046
+Same agent, a well-run kitchen.
+
 37
-00:01:53,658 --> 00:01:55,963
-Models perceive and extract.
+00:01:58,046 --> 00:02:01,341
+Signed logs, wrapped trays, a written plan.
 
 38
-00:01:55,963 --> 00:01:57,200
-Code decides.
+00:02:01,341 --> 00:02:02,591
+Satisfactory.
 
 39
-00:01:57,200 --> 00:02:02,864
-Four Nemotron calls, one rule engine, one reference written from the real inspection grid.
+00:02:02,591 --> 00:02:05,052
+Three minor points, nothing to close.
 
 40
-00:02:02,864 --> 00:02:06,458
-Open source, Apache two point zero, live today.
+00:02:05,052 --> 00:02:07,929
+The grade moves because the evidence moves.
 
 41
-00:02:06,458 --> 00:02:07,356
-Argus.
+00:02:07,929 --> 00:02:10,234
+Models perceive and extract.
 
 42
-00:02:07,356 --> 00:02:09,882
-See your kitchen the way the inspector will.
+00:02:10,234 --> 00:02:11,471
+Code decides.
 
 43
-00:02:09,882 --> 00:02:11,145
+00:02:11,471 --> 00:02:17,135
+Four Nemotron calls, one rule engine, one reference written from the real inspection grid.
+
+44
+00:02:17,135 --> 00:02:20,729
+Open source, Apache two point zero, live today.
+
+45
+00:02:20,729 --> 00:02:21,627
+Argus.
+
+46
+00:02:21,627 --> 00:02:24,153
+See your kitchen the way the inspector will.
+
+47
+00:02:24,153 --> 00:02:25,416
 Before it matters.
 
