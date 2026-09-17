@@ -24,10 +24,15 @@ from hands-on experience in food-hygiene compliance, not from a generic prompt.
 | Step | Model (Nebius Token Factory) | Role |
 |---|---|---|
 | 1. Perception | `openbmb/MiniCPM-V-4_5` | Per photo: zone, equipment, visible anomalies with confidence, positives |
+| 1b. Voice notes | browser Web Speech API → `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | The operator dictates what photos cannot show ("the blast chiller is broken, we cool stews on the counter overnight"); speech-to-text runs in the browser, Nemotron Nano cleans the transcript and extracts inspection facts |
 | 2. Extraction | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | Transcribes messy temperature logs to JSON (reasoning off for fidelity) |
 | 2b. Rules | deterministic code | Applies the limits of the French order of 21/12/2009, detects persistent drift |
 | 3. Judgement | `nvidia/Nemotron-3-Ultra-550b-a55b` (fallback `nvidia/nemotron-3-super-120b-a12b`) | Cross-checks every finding against the DGAL inspection grid, qualifies severity, predicts the grade, writes the report |
 | 4. Food safety plan | `nvidia/nemotron-3-super-120b-a12b` | Drafts the establishment's Food Safety Management Plan (PMS: hygiene practices, HACCP flow with CCPs, records, procedures) so that every finding is addressed by a practice, a control point or a priority action |
+
+Speech recognition uses the browser's Web Speech API (Chrome, Edge, Safari), not a Nebius model:
+no audio-capable Nemotron is available on Token Factory today, and on-device recognition keeps
+the operator's voice off any server. A typed-note fallback covers other browsers.
 
 Design principle: **models perceive and extract, code decides.** Temperature limits and
 verdicts are never left to a language model.

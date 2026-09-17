@@ -3,19 +3,28 @@
   "photos": [
     {
       "file": "walk-in-fridge.jpg",
-      "hint": { "en": "walk-in fridge, vegetables", "fr": "chambre froide légumes" },
+      "hint": {
+        "en": "walk-in fridge, vegetables",
+        "fr": "chambre froide légumes"
+      },
       "credit": "Dwight Sipler, CC BY 2.0",
       "source": "https://commons.wikimedia.org/wiki/File:Walk-in_cooler_(3894648278).jpg"
     },
     {
       "file": "pass-station.jpg",
-      "hint": { "en": "pass and plating station", "fr": "passe et zone de dressage" },
+      "hint": {
+        "en": "pass and plating station",
+        "fr": "passe et zone de dressage"
+      },
       "credit": "MarkBuckawicki, CC0",
       "source": "https://commons.wikimedia.org/wiki/File:Restaurant_Kitchen_expo_station.jpg"
     },
     {
       "file": "blast-chiller.jpg",
-      "hint": { "en": "blast chiller and oven", "fr": "cellule de refroidissement et four" },
+      "hint": {
+        "en": "blast chiller and oven",
+        "fr": "cellule de refroidissement et four"
+      },
       "credit": "Shixart1985, CC BY 2.0",
       "source": "https://commons.wikimedia.org/wiki/File:Kitchen_equipment_seen_in_a_commercial_space_highlights_the_tools_used_for_food_preparation_and_storage_in_a_restaurant.jpg"
     }
@@ -27,5 +36,13 @@
   "statement": {
     "en": "Traditional restaurant, 45 seats, 3 kitchen staff. The owner completed the 14-hour hygiene training in 2019.\nNo written food safety management plan (PMS). Temperatures are logged \"when we think of it\" in a notebook.\nCleaning done every evening but no written plan. Pest-control contract in place.\nFridge 2 has been noisy for a week and its door does not close properly.",
     "fr": "Restaurant traditionnel 45 couverts, 3 salariés en cuisine. Formation hygiène 14 h suivie par le gérant en 2019.\nPas de plan de maîtrise sanitaire écrit. Températures relevées « quand on y pense » sur un cahier.\nNettoyage chaque soir sans plan écrit. Contrat dératisation en cours.\nLe frigo 2 fait du bruit depuis une semaine et la porte ferme mal."
+  },
+  "voiceNotes": {
+    "en": [
+      "Fridge 2 has been at 7 degrees since Tuesday and the door does not close properly, we moved the minced meat to fridge 1 but the deliveries still go into fridge 2."
+    ],
+    "fr": [
+      "Le frigo 2 est à 7 degrés depuis mardi et la porte ferme mal, on a déplacé la viande hachée dans le frigo 1 mais les livraisons vont toujours dans le frigo 2."
+    ]
   }
 }

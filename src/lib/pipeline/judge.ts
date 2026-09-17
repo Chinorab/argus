@@ -3,7 +3,7 @@ import path from "node:path";
 import { MODELS, nebius, extractJson, languageInstruction } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 import { Report, type Observation, type TemperatureReading } from "@/lib/schemas";
-import type { VoiceNote } from "./perceive";
+import type { VoiceNote } from "./notes";
 
 export interface CaseFile {
   establishment: { name: string; type: "commercial_restaurant" };
@@ -37,6 +37,10 @@ Mandatory writing rules:
   Severity = that of the worst reading.
 - A photo anomaly with confidence < 0.6, or that looks implausible in context, goes into
   "to_verify" with the mention "to confirm on site", not into "findings".
+- A finding whose only evidence is a photo anomaly can be "critical" only if that anomaly has
+  confidence >= 0.8 AND the hazard is unambiguous in the description (e.g. visible pest
+  droppings, food on the floor). Otherwise cap it at "major" and add "to confirm on site" to
+  the observation. Temperature readings and operator statements are not subject to this cap.
 - 12 findings maximum; merge what belongs to the same grid point.
 - Each finding cites the grid point (e.g. B3) and the text (e.g. EC 852/2004 Annex II ch. IX).
 - Qualify severity with the § 4 scale and predict the Alim'confiance grade by applying the § 4
@@ -93,10 +97,10 @@ function buildCaseText(c: CaseFile): string {
   );
   lines.push("\n## Operator voice notes");
   if (!c.voiceNotes.length) lines.push("None.");
-  c.voiceNotes.forEach((n, i) => {
-    lines.push(`- A-${String(i + 1).padStart(2, "0")} "${n.transcript}"`);
+  for (const n of c.voiceNotes) {
+    lines.push(`- ${n.ref} "${n.transcript}"`);
     n.facts.forEach((f) => lines.push(`  · fact: ${f}`));
-  });
+  }
   lines.push("\n## Operator statement");
   lines.push(c.statement?.trim() || "No information about the PMS, training or traceability.");
   return lines.join("\n");

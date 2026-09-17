@@ -27,6 +27,8 @@ export async function POST(request: Request) {
     if (p.dataUrl.length > MAX_PHOTO_BYTES * 1.4)
       return Response.json({ error: `Photo ${p.ref}: too large` }, { status: 400 });
   }
+  if (input.voiceNotes && (!Array.isArray(input.voiceNotes) || input.voiceNotes.length > 20 || input.voiceNotes.some((n) => typeof n !== "string" || n.length > 2000)))
+    return Response.json({ error: "voiceNotes: up to 20 strings of 2000 characters" }, { status: 400 });
   if (!process.env.NEBIUS_API_KEY)
     return Response.json({ error: "NEBIUS_API_KEY is missing on the server" }, { status: 500 });
 

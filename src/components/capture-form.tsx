@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Camera, ImagePlus, X, Thermometer, FileText, ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { Camera, ImagePlus, X, Thermometer, FileText, ArrowRight, Loader2, Sparkles, Mic, Square, MessageSquareText, Plus } from "lucide-react";
 import { compressImage } from "@/lib/client/images";
+import { useSpeech } from "@/lib/client/speech";
 import { useLang, useT } from "@/lib/i18n";
 
 export interface PhotoDraft {
@@ -15,6 +16,7 @@ export interface PhotoDraft {
 export interface CaptureDraft {
   establishment: string;
   photos: PhotoDraft[];
+  voiceNotes: string[];
   temperatures: string;
   statement: string;
 }
@@ -22,6 +24,7 @@ export interface CaptureDraft {
 interface DemoManifest {
   establishment: string;
   photos: { file: string; hint: Record<string, string> }[];
+  voiceNotes?: Record<string, string[]>;
   temperatures: Record<string, string>;
   statement: Record<string, string>;
 }
@@ -40,7 +43,14 @@ export function CaptureForm({ onSubmit, busy }: Props) {
   const [photos, setPhotos] = useState<PhotoDraft[]>([]);
   const [temperatures, setTemperatures] = useState("");
   const [statement, setStatement] = useState("");
+  const [voiceNotes, setVoiceNotes] = useState<string[]>([]);
+  const [typedNote, setTypedNote] = useState("");
   const [loading, setLoading] = useState(false);
+  const addNote = useCallback((text: string) => {
+    const clean = text.trim();
+    if (clean) setVoiceNotes((list) => [...list, clean].slice(0, 20));
+  }, []);
+  const speech = useSpeech(lang, addNote);
   const fileInput = useRef<HTMLInputElement>(null);
   const cameraInput = useRef<HTMLInputElement>(null);
 
@@ -82,6 +92,7 @@ export function CaptureForm({ onSubmit, busy }: Props) {
       }
       setEstablishment(manifest.establishment);
       setPhotos(renumber(next));
+      setVoiceNotes(manifest.voiceNotes?.[lang] ?? manifest.voiceNotes?.en ?? []);
       setTemperatures(manifest.temperatures[lang] ?? manifest.temperatures.en);
       setStatement(manifest.statement[lang] ?? manifest.statement.en);
     } finally {
@@ -96,7 +107,7 @@ export function CaptureForm({ onSubmit, busy }: Props) {
       className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-4 pb-32 pt-6 sm:pt-10"
       onSubmit={(e) => {
         e.preventDefault();
-        if (canSubmit) onSubmit({ establishment, photos, temperatures, statement });
+        if (canSubmit) onSubmit({ establishment, photos, voiceNotes, temperatures, statement });
       }}
     >
       <header className="flex flex-col gap-2">
@@ -178,6 +189,82 @@ export function CaptureForm({ onSubmit, busy }: Props) {
         </div>
         <input ref={fileInput} type="file" accept="image/*" multiple hidden onChange={(e) => addFiles(e.target.files)} />
         <input ref={cameraInput} type="file" accept="image/*" capture="environment" hidden onChange={(e) => addFiles(e.target.files)} />
+      </section>
+
+      <section className="flex flex-col gap-2">
+        <div className="flex items-baseline justify-between">
+          <h2 className="flex items-center gap-1.5 text-sm font-medium">
+            <MessageSquareText size={15} className="text-ink-3" /> {t.voiceNotes}
+          </h2>
+          <button type="button" onClick={() => addNote(t.exampleNote)} className="text-xs text-accent hover:underline">
+            {t.pasteExample}
+          </button>
+        </div>
+        <p className="text-xs text-ink-3">{t.voiceHint}</p>
+
+        {voiceNotes.length > 0 && (
+          <ul className="flex flex-col gap-1.5">
+            {voiceNotes.map((n, i) => (
+              <li key={i} className="argus-rise flex items-start gap-2 rounded-md border border-line bg-paper-2 p-2 text-sm">
+                <span className="mt-0.5 font-mono text-[10px] text-ink-3">A-{String(i + 1).padStart(2, "0")}</span>
+                <span className="flex-1">{n}</span>
+                <button type="button" aria-label={t.removeNote} onClick={() => setVoiceNotes((list) => list.filter((_, j) => j !== i))} className="rounded p-0.5 text-ink-3 hover:bg-paper-3 hover:text-ink">
+                  <X size={14} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {speech.listening && (
+          <p className="min-h-10 rounded-md border border-accent/40 bg-accent-soft/40 p-2 text-sm">
+            <span className="mr-2 inline-block h-2 w-2 animate-pulse rounded-full bg-n4" />
+            {speech.interim || t.listening}
+          </p>
+        )}
+
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {speech.supported ? (
+            <button
+              type="button"
+              onClick={speech.listening ? speech.stop : speech.start}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition ${speech.listening ? "bg-n4 text-white" : "bg-accent text-accent-ink hover:opacity-90"}`}
+            >
+              {speech.listening ? <Square size={15} /> : <Mic size={15} />}
+              {speech.listening ? t.stopRecording : t.startRecording}
+            </button>
+          ) : (
+            <p className="text-xs text-ink-3">{t.speechUnsupported}</p>
+          )}
+          <div className="flex flex-1 gap-2">
+            <input
+              value={typedNote}
+              onChange={(e) => setTypedNote(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addNote(typedNote);
+                  setTypedNote("");
+                }
+              }}
+              placeholder={t.notePlaceholder}
+              aria-label={t.typeNote}
+              className="min-w-0 flex-1 rounded-lg border border-line bg-paper-2 px-3 py-2 text-sm outline-none ring-accent/40 placeholder:text-ink-3 focus:ring-2"
+            />
+            <button
+              type="button"
+              disabled={!typedNote.trim()}
+              onClick={() => {
+                addNote(typedNote);
+                setTypedNote("");
+              }}
+              className="flex items-center gap-1 rounded-lg border border-line px-3 py-2 text-sm hover:bg-paper-3 disabled:opacity-40"
+            >
+              <Plus size={14} /> {t.addNote}
+            </button>
+          </div>
+        </div>
+        {speech.error && <p className="text-xs text-n4">{speech.error}</p>}
       </section>
 
       <section className="flex flex-col gap-2">

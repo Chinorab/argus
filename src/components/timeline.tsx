@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, Eye, Thermometer, Scale, AlertTriangle, Loader2 } from "lucide-react";
+import { Check, Eye, Thermometer, Scale, AlertTriangle, Loader2, MessageSquareText } from "lucide-react";
 import type { InspectionEvent } from "@/lib/pipeline/run";
 import type { PhotoDraft } from "./capture-form";
 import { shortModel, useT } from "@/lib/i18n";
@@ -10,6 +10,7 @@ interface Props {
   events: InspectionEvent[];
   photos: PhotoDraft[];
   hasTemperatures: boolean;
+  noteCount: number;
 }
 
 type Status = "pending" | "running" | "done" | "error";
@@ -30,7 +31,7 @@ function useNow(active: boolean) {
 }
 
 /** Agentic timeline: what each model is doing, live. */
-export function Timeline({ events, photos, hasTemperatures }: Props) {
+export function Timeline({ events, photos, hasTemperatures, noteCount }: Props) {
   const t = useT();
   const ended = events.some((e) => e.type === "end");
   const now = useNow(!ended);
@@ -40,6 +41,7 @@ export function Timeline({ events, photos, hasTemperatures }: Props) {
   for (const p of photos) photoState.set(p.ref, { status: "pending" });
   let tempState: { status: Status; ms?: number; n?: number; bad?: number; model?: string; message?: string } = { status: hasTemperatures ? "pending" : "done", n: 0, bad: 0 };
   let judgeState: { status: Status; model?: string; ms?: number; fallback?: string; startedAt?: number; message?: string } = { status: "pending" };
+  let notesState: { status: Status; ms?: number; n?: number; facts?: number; model?: string; message?: string } = { status: "pending" };
 
   for (const e of events) {
     switch (e.type) {
@@ -51,6 +53,15 @@ export function Timeline({ events, photos, hasTemperatures }: Props) {
         break;
       case "photo:error":
         photoState.set(e.ref, { status: "error", message: e.message });
+        break;
+      case "notes:start":
+        notesState = { status: "running", model: e.model };
+        break;
+      case "notes:done":
+        notesState = { status: "done", ms: e.ms, n: e.notes.length, facts: e.notes.reduce((a, n) => a + n.facts.length, 0), model: notesState.model };
+        break;
+      case "notes:error":
+        notesState = { status: "error", message: e.message };
         break;
       case "temperatures:start":
         tempState = { status: "running", model: e.model };
@@ -113,6 +124,17 @@ export function Timeline({ events, photos, hasTemperatures }: Props) {
             })}
           </ul>
         </Step>
+
+        {noteCount > 0 && (
+          <Step icon={<MessageSquareText size={16} />} title={t.structuringNotes} model={notesState.model ? shortModel(notesState.model) : undefined} status={notesState.status}>
+            <p className="mt-1 text-sm text-ink-2">
+              {notesState.status === "pending" && t.waiting}
+              {notesState.status === "running" && t.notesRunning}
+              {notesState.status === "done" && t.notesDone(notesState.n ?? 0, notesState.facts ?? 0, sec(notesState.ms))}
+              {notesState.status === "error" && `${t.error}: ${notesState.message}`}
+            </p>
+          </Step>
+        )}
 
         <Step icon={<Thermometer size={16} />} title={t.readingLogs} model={tempState.model ? shortModel(tempState.model) : undefined} status={tempState.status}>
           <p className="mt-1 text-sm text-ink-2">

@@ -48,34 +48,3 @@ export async function perceiveImage(input: PerceiveInput): Promise<Observation> 
   const text = res.choices[0]?.message?.content ?? "";
   return Observation.parse(extractJson(text));
 }
-
-const SYSTEM_AUDIO = `You listen to a voice note from a restaurant operator describing a problem or a
-situation in their kitchen. Transcribe it faithfully, then extract the facts useful to a food-safety
-inspection (equipment concerned, temperature, duration, practice described).
-Reply ONLY in JSON: {"transcript": "...", "facts": ["..."]}`;
-
-export interface VoiceNote {
-  transcript: string;
-  facts: string[];
-}
-
-/** Step 1b — voice note transcribed and structured (requires an audio-capable model). */
-export async function perceiveAudio(audioBase64: string, format: "wav" | "mp3", lang: Lang): Promise<VoiceNote> {
-  const res = await nebius.chat.completions.create({
-    model: MODELS.perception,
-    temperature: 0.1,
-    max_tokens: 800,
-    messages: [
-      { role: "system", content: `${SYSTEM_AUDIO}\n${languageInstruction(lang)}` },
-      {
-        role: "user",
-        content: [
-          { type: "input_audio", input_audio: { data: audioBase64, format } },
-          { type: "text", text: "Transcribe and structure this voice note." },
-        ],
-      },
-    ],
-  });
-  const text = res.choices[0]?.message?.content ?? "";
-  return extractJson<VoiceNote>(text);
-}

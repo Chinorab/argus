@@ -40,3 +40,9 @@ what worked, what got in the way.
   flattens objects to text absorbed everything; strict schemas would have failed one call in two.
 - Reusing the same `reasoning`-free path as Ultra: Super returns `content` directly, no
   `reasoning` field at temperature 0.2 with this prompt.
+
+## 2026-09-17 — Voice notes
+- No audio-input model in the Token Factory catalogue (Nemotron 3 Nano Omni would be the natural
+  fit and is announced, but absent). Argus uses the browser's Web Speech API for speech-to-text
+  and Nemotron Nano 30B (thinking off) to clean transcripts and extract facts: 1.5-1.8 s for two
+  notes, faithful, no hallucinated facts in a dozen runs.

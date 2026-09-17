@@ -1,7 +1,8 @@
 import { MODELS } from "@/lib/nebius";
 import type { Lang } from "@/lib/lang";
 import type { Observation, TemperatureReading } from "@/lib/schemas";
-import { perceiveImage, perceiveAudio, type VoiceNote } from "./perceive";
+import { perceiveImage } from "./perceive";
+import { structureVoiceNotes, type VoiceNote } from "./notes";
 import { extractTemperatures } from "./extract";
 import { judge, type CaseFile, type JudgeResult } from "./judge";
 
@@ -14,16 +15,11 @@ export interface PhotoInput {
   hint?: string;
 }
 
-export interface AudioInput {
-  ref: string;
-  base64: string;
-  format: "wav" | "mp3";
-}
-
 export interface InspectionInput {
   establishment: string;
   photos: PhotoInput[];
-  audios?: AudioInput[];
+  /** Voice notes already transcribed in the browser (Web Speech API). */
+  voiceNotes?: string[];
   temperatures?: string;
   statement?: string;
   lang?: Lang;
@@ -31,13 +27,13 @@ export interface InspectionInput {
 
 /** Events emitted during an inspection, consumed by the UI timeline. */
 export type InspectionEvent =
-  | { type: "start"; establishment: string; photoCount: number; audioCount: number; at: number }
+  | { type: "start"; establishment: string; photoCount: number; noteCount: number; at: number }
   | { type: "photo:start"; ref: string; model: string }
   | { type: "photo:done"; ref: string; observation: Observation; ms: number }
   | { type: "photo:error"; ref: string; message: string }
-  | { type: "audio:start"; ref: string; model: string }
-  | { type: "audio:done"; ref: string; note: VoiceNote; ms: number }
-  | { type: "audio:error"; ref: string; message: string }
+  | { type: "notes:start"; model: string }
+  | { type: "notes:done"; notes: VoiceNote[]; ms: number }
+  | { type: "notes:error"; message: string }
   | { type: "temperatures:start"; model: string }
   | { type: "temperatures:done"; readings: TemperatureReading[]; ms: number }
   | { type: "temperatures:error"; message: string }
@@ -49,13 +45,13 @@ export type InspectionEvent =
 
 /**
  * Orchestrates the full inspection and emits events as they happen.
- * Photos, audio and temperature logs run in parallel, then the judgement.
+ * Photos, voice notes and temperature logs run in parallel, then the judgement.
  */
 export async function* runInspection(input: InspectionInput): AsyncGenerator<InspectionEvent> {
   const t0 = Date.now();
   const lang: Lang = input.lang ?? "en";
-  const audios = input.audios ?? [];
-  yield { type: "start", establishment: input.establishment, photoCount: input.photos.length, audioCount: audios.length, at: t0 };
+  const transcripts = (input.voiceNotes ?? []).map((t) => t.trim()).filter(Boolean);
+  yield { type: "start", establishment: input.establishment, photoCount: input.photos.length, noteCount: transcripts.length, at: t0 };
 
   // Event queue fed by the parallel tasks and drained by the generator.
   const queue: InspectionEvent[] = [];
@@ -66,7 +62,7 @@ export async function* runInspection(input: InspectionInput): AsyncGenerator<Ins
   };
 
   const photos: CaseFile["photos"] = [];
-  const voiceNotes: VoiceNote[] = [];
+  let voiceNotes: VoiceNote[] = [];
 
   const tasks: Promise<void>[] = [
     ...input.photos.map(async (p) => {
@@ -80,18 +76,24 @@ export async function* runInspection(input: InspectionInput): AsyncGenerator<Ins
         push({ type: "photo:error", ref: p.ref, message: (err as Error).message });
       }
     }),
-    ...audios.map(async (a) => {
-      push({ type: "audio:start", ref: a.ref, model: MODELS.perception });
-      const t = Date.now();
-      try {
-        const note = await perceiveAudio(a.base64, a.format, lang);
-        voiceNotes.push(note);
-        push({ type: "audio:done", ref: a.ref, note, ms: Date.now() - t });
-      } catch (err) {
-        push({ type: "audio:error", ref: a.ref, message: (err as Error).message });
-      }
-    }),
   ];
+
+  if (transcripts.length) {
+    tasks.push(
+      (async () => {
+        push({ type: "notes:start", model: MODELS.fast });
+        const t = Date.now();
+        try {
+          voiceNotes = await structureVoiceNotes(transcripts, lang);
+          push({ type: "notes:done", notes: voiceNotes, ms: Date.now() - t });
+        } catch (err) {
+          // Keep the raw transcripts as evidence even if structuring failed.
+          voiceNotes = transcripts.map((tr, i) => ({ ref: `A-${String(i + 1).padStart(2, "0")}`, transcript: tr, facts: [] }));
+          push({ type: "notes:error", message: (err as Error).message });
+        }
+      })(),
+    );
+  }
 
   let temperatures: TemperatureReading[] = [];
   if (input.temperatures?.trim()) {

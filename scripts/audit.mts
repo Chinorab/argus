@@ -1,7 +1,7 @@
 /**
  * Argus pipeline CLI.
  *   npm run audit -- samples/demo [en|fr]
- * The folder holds .jpg/.png photos, an optional temperatures.txt and statement.txt.
+ * The folder holds .jpg/.png photos, optional temperatures.txt, statement.txt and notes.txt (one voice note per line).
  */
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -11,6 +11,7 @@ config({ path: ".env.local" });
 const { perceiveImage } = await import("../src/lib/pipeline/perceive");
 const { extractTemperatures } = await import("../src/lib/pipeline/extract");
 const { judge } = await import("../src/lib/pipeline/judge");
+const { structureVoiceNotes } = await import("../src/lib/pipeline/notes");
 
 const dir = process.argv[2] ?? "samples/demo";
 const lang = (process.argv[3] === "fr" ? "fr" : "en") as "en" | "fr";
@@ -46,11 +47,21 @@ if (files.includes("temperatures.txt")) {
   console.log(`  ok ${temperatures.length} reading(s), ${temperatures.filter((r) => !r.compliant).length} out of range (${Date.now() - t} ms)`);
 }
 
+let voiceNotes: Awaited<ReturnType<typeof structureVoiceNotes>> = [];
+if (files.includes("notes.txt")) {
+  console.log("> Structuring voice notes with Nano 30B...");
+  const t = Date.now();
+  const lines = (await readFile(path.join(dir, "notes.txt"), "utf8")).split(/\r?\n/).filter((l) => l.trim());
+  voiceNotes = await structureVoiceNotes(lines, lang);
+  console.log(`  ok ${voiceNotes.length} note(s), ${voiceNotes.reduce((a, n) => a + n.facts.length, 0)} fact(s) (${Date.now() - t} ms)`);
+  for (const n of voiceNotes) console.log(`  ${n.ref} ${n.transcript}\n     facts: ${n.facts.join(" | ")}`);
+}
+
 const statement = files.includes("statement.txt") ? await readFile(path.join(dir, "statement.txt"), "utf8") : undefined;
 
 console.log("> Regulatory judgement...");
 const result = await judge(
-  { establishment: { name: path.basename(dir), type: "commercial_restaurant" }, photos, temperatures, voiceNotes: [], statement, lang },
+  { establishment: { name: path.basename(dir), type: "commercial_restaurant" }, photos, temperatures, voiceNotes, statement, lang },
   (e) => console.log(`  . ${e.type} ${e.model}${e.ms ? ` (${e.ms} ms)` : ""}`),
 );
 

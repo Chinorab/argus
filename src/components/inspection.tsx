@@ -38,6 +38,7 @@ export function Inspection() {
         {
           establishment: d.establishment,
           photos: d.photos.map((p) => ({ ref: p.ref, dataUrl: p.dataUrl, hint: p.hint || undefined })),
+          voiceNotes: d.voiceNotes,
           temperatures: d.temperatures,
           statement: d.statement,
           lang,
@@ -71,7 +72,7 @@ export function Inspection() {
 
   return (
     <>
-      <Timeline events={events} photos={draft?.photos ?? []} hasTemperatures={Boolean(draft?.temperatures.trim())} />
+      <Timeline events={events} photos={draft?.photos ?? []} hasTemperatures={Boolean(draft?.temperatures.trim())} noteCount={draft?.voiceNotes.length ?? 0} />
       {error && (
         <div className="mx-auto w-full max-w-3xl px-4">
           <div className="rounded-lg border border-n4/40 bg-n4/10 p-4 text-sm">
