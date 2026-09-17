@@ -50,3 +50,7 @@ samples/**/report.json
 samples/**/pms.json
 docs/media/*.mp3
 docs/media/cards/*.html
+docs/media/raw/
+docs/media/work/
+docs/media/*.mp4
+docs/media/kitchens/
