@@ -37,7 +37,7 @@ export to PDF through a print stylesheet (**Download PDF** → "Save as PDF") an
 ## Run it locally
 
 ```bash
-git clone https://github.com/<user>/argus && cd argus
+git clone https://github.com/Chinorab/argus && cd argus
 npm install
 cp .env.example .env.local   # set NEBIUS_API_KEY
 npm run dev
