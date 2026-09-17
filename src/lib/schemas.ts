@@ -140,17 +140,28 @@ export const Finding = z.object({
   observation: z.string(),
   regulatory_reference: z.string(),
   risk: z.string(),
-  evidence: z.object({
-    type: lenientEnum(["photo", "temperature", "audio", "declared"], "declared", {
-      releve: "temperature",
-      reading: "temperature",
-      voice: "audio",
-      voice_note: "audio",
-      declaratif: "declared",
-      statement: "declared",
+  // Ultra sometimes returns several pieces of evidence as an array: keep the first type, merge the refs.
+  evidence: z.preprocess(
+    (v) => {
+      if (Array.isArray(v)) {
+        const items = v.filter((x) => x && typeof x === "object") as { type?: unknown; ref?: unknown }[];
+        if (!items.length) return v;
+        return { type: items[0].type, ref: items.map((x) => String(x.ref ?? "")).filter(Boolean).join(", ") };
+      }
+      return v;
+    },
+    z.object({
+      type: lenientEnum(["photo", "temperature", "audio", "declared"], "declared", {
+        releve: "temperature",
+        reading: "temperature",
+        voice: "audio",
+        voice_note: "audio",
+        declaratif: "declared",
+        statement: "declared",
+      }),
+      ref: z.coerce.string(),
     }),
-    ref: z.string(),
-  }),
+  ),
   corrective_action: z.string(),
   deadline: lenientEnum(["immediate", "24h", "7d", "30d"], "7d", {
     immediat: "immediate",

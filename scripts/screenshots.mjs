@@ -45,7 +45,7 @@ await shot("03-timeline");
 
 // 4. Report: verdict banner
 try {
-  await waitText("Simulated inspection report", 200_000);
+  await waitText("Simulated inspection report", 290_000);
 } catch (e) {
   await shot("debug-timeout");
   console.log(await page.evaluate(() => document.body.innerText.slice(0, 1200)));
