@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CaptureForm, type CaptureDraft, type CaptureFormHandle } from "./capture-form";
 import { Hero } from "./hero";
 import { Footer } from "./footer";
+import { HOME_EVENT } from "./nav";
 import { Timeline } from "./timeline";
 import { Report } from "./report";
 import { inspect } from "@/lib/client/sse";
@@ -70,6 +71,13 @@ export function Inspection() {
     setResult(null);
     setError(null);
   }
+
+  // The logo in the nav brings the user back to the landing screen from any phase.
+  useEffect(() => {
+    const onHome = () => reset();
+    window.addEventListener(HOME_EVENT, onHome);
+    return () => window.removeEventListener(HOME_EVENT, onHome);
+  });
 
   if (phase === "capture")
     return (
