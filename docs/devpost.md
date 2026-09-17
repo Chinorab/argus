@@ -79,7 +79,7 @@ Two design principles shaped the architecture:
 
 The regulatory knowledge is a 140-line reference I wrote from the texts and the inspection grid used by French inspectors: applicable regulations, temperature table, 41 control points across premises, practices, documentation and staff, a severity scale, and the rules that turn findings into one of the four public grades.
 
-Stack: Next.js 16, React 19, TypeScript, Tailwind 4, zod, the OpenAI SDK pointed at Token Factory, Server-Sent Events for the live timeline, a print stylesheet for the PDF. Deployed on Vercel; the API key lives only server-side (`server-only` guard).
+Stack: Next.js 16, React 19, TypeScript, Tailwind 4, zod, the OpenAI SDK pointed at Token Factory, Server-Sent Events for the live timeline, a print stylesheet for the PDF. The public demo is deployed on Vercel; the same image is packaged for Nebius AI Cloud (Dockerfile, Docker Compose with Caddy, one-shot VM setup script in `deploy/`). The API key lives only server-side (`server-only` guard) with per-call timeouts and an Ultra → Super fallback.
 
 ### Challenges we ran into
 
