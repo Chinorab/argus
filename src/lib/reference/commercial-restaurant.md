@@ -103,6 +103,34 @@ Mandatory qualification of temperature findings (B2), one per unit, applied as i
 - isolated excursion beyond tolerance (> 2 °C on chilled units, any excursion on frozen or hot holding) → **major**;
 - isolated excursion within the 2 °C door-opening tolerance on a chilled unit → **minor**.
 
+### Fixed severities for frequent findings (apply first; deviate only with a stated reason)
+
+| Finding (with evidence) | Severity |
+|---|---|
+| Pest traces visible (droppings, insects in numbers, rodent) | critical |
+| Product past its use-by date visible in stock, or visibly spoiled | critical |
+| Cooked food cooled at room temperature for hours (e.g. overnight on a counter), declared or observed | critical |
+| Blast chiller out of service with no equivalent cooling method | critical |
+| Raw item in direct contact with, or dripping onto, a named ready-to-eat item | critical if widespread, otherwise major |
+| Food stored directly on the floor | major |
+| Unwrapped or uncovered food in a cold unit or storeroom (storage, not active preparation) | major |
+| Raw wood work surface or board in contact with food | major |
+| Wooden shelving or structure inside a cold unit, not in contact with food | minor |
+| Cardboard delivery boxes inside a cold unit | minor; major if food is in direct contact with damp or soiled cardboard |
+| Hand-wash sink visibly unusable (blocked, used as storage, no soap or towels) | major |
+| Cleaning chemicals stored next to or above food | major |
+| No written food safety management plan (PMS) — declared | major |
+| Temperature logs not kept, or kept irregularly — declared | major |
+| No written cleaning and disinfection plan — declared | major |
+| No hygiene training certificate in the establishment — declared | major |
+| Isolated chilled excursion within the 2 °C tolerance | minor |
+| Dirty or damaged door gasket, frost build-up, grease on equipment | minor |
+| Floor or wall soiling, broken tile, flaking paint (outside food-contact zones) | minor; major if mould or flaking paint directly above a food-contact surface |
+| Open or overflowing waste bin in a production area | minor |
+| Window or door open without insect screen during production | minor |
+| Staff without hair cover, or with a non-dedicated garment | minor |
+| Working clutter, tools or open containers during active preparation | minor at most |
+
 Overall grade prediction rules:
 1. ≥ 1 uncontrolled **critical** non-compliance → **urgent_correction** (closure risk: high; formal notice or immediate administrative closure possible).
 2. ≥ 3 **major** non-compliances, or 1 major combined with ≥ 5 minors → **to_improve** (risk: moderate; warning, formal notice, re-inspection).

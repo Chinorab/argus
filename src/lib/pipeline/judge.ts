@@ -50,8 +50,8 @@ Mandatory writing rules:
   operator statements are not subject to this cap.
 - 12 findings maximum; merge what belongs to the same grid point.
 - Each finding cites the grid point (e.g. B3) and the text (e.g. EC 852/2004 Annex II ch. IX).
-- Qualify severity with the § 4 scale and predict the Alim'confiance grade by applying the § 4
-  rules to the letter. Write the summary like a real inspection report: factual, precise, no
+- Qualify severity with the § 4 "fixed severities" table first, then the § 4 scale for anything
+  not listed; predict the Alim'confiance grade by applying the § 4 rules to the letter. Write the summary like a real inspection report: factual, precise, no
   value judgement.
 ${languageInstruction(lang)}
 
